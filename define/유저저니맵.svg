@@ -1,0 +1,153 @@
+<svg width="1200" height="700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .stage-header { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; text-anchor: middle; }
+      .category-text { font-family: Arial, sans-serif; font-size: 12px; text-anchor: start; }
+      .content-text { font-family: Arial, sans-serif; font-size: 10px; text-anchor: start; }
+      .positive-emotion { fill: #4CAF50; }
+      .negative-emotion { fill: #F44336; }
+      .emotion-line { stroke: #FF9800; stroke-width: 3; fill: none; }
+    </style>
+  </defs>
+
+  <!-- 배경 -->
+  <rect width="1200" height="700" fill="#f5f5f5"/>
+
+  <!-- 제목 -->
+  <text x="600" y="30" class="stage-header" style="font-size: 18px;">간편하게 가성비 좋은 핸드폰 구매 고객의 유저저니맵</text>
+
+  <!-- 단계 구분선 -->
+  <line x1="0" y1="60" x2="1200" y2="60" stroke="#ddd" stroke-width="1"/>
+  <line x1="240" y1="60" x2="240" y2="700" stroke="#ddd" stroke-width="1"/>
+  <line x1="480" y1="60" x2="480" y2="700" stroke="#ddd" stroke-width="1"/>
+  <line x1="720" y1="60" x2="720" y2="700" stroke="#ddd" stroke-width="1"/>
+  <line x1="960" y1="60" x2="960" y2="700" stroke="#ddd" stroke-width="1"/>
+
+  <!-- 단계 헤더 -->
+  <text x="120" y="80" class="stage-header">인지</text>
+  <text x="360" y="80" class="stage-header">비교평가</text>
+  <text x="600" y="80" class="stage-header">결제</text>
+  <text x="840" y="80" class="stage-header">사용</text>
+  <text x="1080" y="80" class="stage-header">이용/반품</text>
+
+  <!-- 카테고리 라벨 -->
+  <text x="10" y="120" class="category-text" style="font-weight: bold;">행동</text>
+  <text x="10" y="200" class="category-text" style="font-weight: bold;">감정변화</text>
+  <text x="10" y="280" class="category-text" style="font-weight: bold;">좋은 느낌</text>
+  <text x="10" y="380" class="category-text" style="font-weight: bold;">나쁜 느낌</text>
+
+  <!-- 감정 곡선 영역 (별도 영역으로 분리) -->
+  <rect x="40" y="190" width="1150" height="80" fill="#fff" stroke="#ddd" stroke-width="1"/>
+
+  <!-- 감정 곡선 -->
+  <path d="M 120 240 Q 200 225 240 235 Q 320 250 360 255 Q 440 245 480 230 Q 560 215 600 220 Q 680 235 720 225 Q 800 220 840 210 Q 920 205 960 215 Q 1040 220 1080 225" class="emotion-line"/>
+
+  <!-- 감정 포인트 (이모티콘으로 표현) -->
+  <circle cx="120" cy="240" r="8" fill="#FFC107"/>
+  <text x="120" y="245" text-anchor="middle" style="font-size: 12px;">😐</text>
+
+  <circle cx="360" cy="255" r="8" fill="#FF5722"/>
+  <text x="360" y="260" text-anchor="middle" style="font-size: 12px;">😰</text>
+
+  <circle cx="600" cy="220" r="8" fill="#FF9800"/>
+  <text x="600" y="225" text-anchor="middle" style="font-size: 12px;">😟</text>
+
+  <circle cx="840" cy="210" r="8" fill="#4CAF50"/>
+  <text x="840" y="215" text-anchor="middle" style="font-size: 12px;">😊</text>
+
+  <circle cx="1080" cy="225" r="8" fill="#2196F3"/>
+  <text x="1080" y="230" text-anchor="middle" style="font-size: 12px;">🙂</text>
+
+  <!-- 인지 단계 내용 -->
+  <text x="50" y="140" class="content-text">• SNS 광고 접촉 (25%)</text>
+  <text x="50" y="155" class="content-text">• 지인 추천 (40%)</text>
+  <text x="50" y="170" class="content-text">• TV/매체 광고 (20%)</text>
+  <text x="50" y="185" class="content-text">• 커뮤니티 검색 (15%)</text>
+
+  <text x="50" y="300" class="content-text positive-emotion">• 새로운 기술에 대한 호기심</text>
+  <text x="50" y="315" class="content-text positive-emotion">• 지인 추천으로 인한 신뢰감</text>
+  <text x="50" y="330" class="content-text positive-emotion">• 할인 혜택에 대한 기대감</text>
+
+  <text x="50" y="400" class="content-text negative-emotion">• 브랜드별 차이점 모름</text>
+  <text x="50" y="415" class="content-text negative-emotion">• 기술 용어 이해 어려움</text>
+  <text x="50" y="430" class="content-text negative-emotion">• 정보 신뢰도 의문</text>
+
+  <!-- 비교평가 단계 내용 -->
+  <text x="290" y="140" class="content-text">• 가격 비교 (100%)</text>
+  <text x="290" y="155" class="content-text">• 성능 스펙 확인 (70%)</text>
+  <text x="290" y="170" class="content-text">• 브랜드 신뢰도 (60%)</text>
+  <text x="290" y="185" class="content-text">• 디자인 선호도 (40%)</text>
+
+  <text x="290" y="300" class="content-text positive-emotion">• 다양한 선택옵션 존재</text>
+  <text x="290" y="315" class="content-text positive-emotion">• 상세한 정보 제공</text>
+  <text x="290" y="330" class="content-text positive-emotion">• 온라인 리뷰 참고 가능</text>
+
+  <text x="290" y="400" class="content-text negative-emotion">• 정보 과다로 혼란</text>
+  <text x="290" y="415" class="content-text negative-emotion">• 전문용어 이해 어려움</text>
+  <text x="290" y="430" class="content-text negative-emotion">• 실제 체험 기회 부족</text>
+  <text x="290" y="445" class="content-text negative-emotion">• 채널별 가격 상이</text>
+
+  <!-- 결제 단계 내용 -->
+  <text x="530" y="140" class="content-text">• 카드 할부 결제 (60%)</text>
+  <text x="530" y="155" class="content-text">• 현금 결제 (30%)</text>
+  <text x="530" y="170" class="content-text">• 법인카드 결제 (10%)</text>
+  <text x="530" y="185" class="content-text">• 본인인증 과정</text>
+
+  <text x="530" y="300" class="content-text positive-emotion">• 무이자 할부 혜택</text>
+  <text x="530" y="315" class="content-text positive-emotion">• 간편결제 옵션</text>
+  <text x="530" y="330" class="content-text positive-emotion">• 안전한 결제 시스템</text>
+
+  <text x="530" y="400" class="content-text negative-emotion">• 복잡한 인증 절차</text>
+  <text x="530" y="415" class="content-text negative-emotion">• 할부 조건 이해 어려움</text>
+  <text x="530" y="430" class="content-text negative-emotion">• 배송비 등 추가 비용</text>
+  <text x="530" y="445" class="content-text negative-emotion">• 최종 가격 예측 어려움</text>
+
+  <!-- 사용 단계 내용 -->
+  <text x="770" y="140" class="content-text">• 기본 통신 기능 (100%)</text>
+  <text x="770" y="155" class="content-text">• 카메라 촬영 (80%)</text>
+  <text x="770" y="170" class="content-text">• 앱 사용 (70%)</text>
+  <text x="770" y="185" class="content-text">• 게임 플레이 (30%)</text>
+
+  <text x="770" y="300" class="content-text positive-emotion">• 성능 만족도 높음</text>
+  <text x="770" y="315" class="content-text positive-emotion">• 카메라 품질 우수</text>
+  <text x="770" y="330" class="content-text positive-emotion">• 배터리 지속시간 양호</text>
+  <text x="770" y="345" class="content-text positive-emotion">• 직관적인 UI</text>
+
+  <text x="770" y="400" class="content-text negative-emotion">• 초기 설정 복잡</text>
+  <text x="770" y="415" class="content-text negative-emotion">• 데이터 이전 어려움</text>
+  <text x="770" y="430" class="content-text negative-emotion">• 고급 기능 미활용</text>
+  <text x="770" y="445" class="content-text negative-emotion">• 한 손 조작 불편</text>
+
+  <!-- 이용/반품 단계 내용 -->
+  <text x="1010" y="140" class="content-text">• 평균 3년 사용</text>
+  <text x="1010" y="155" class="content-text">• A/S 경험 (30%)</text>
+  <text x="1010" y="170" class="content-text">• 재구매 의향 (90%)</text>
+  <text x="1010" y="185" class="content-text">• 브랜드 충성도 형성</text>
+
+  <text x="1010" y="300" class="content-text positive-emotion">• 전반적 만족도 높음</text>
+  <text x="1010" y="315" class="content-text positive-emotion">• 장기간 안정적 사용</text>
+  <text x="1010" y="330" class="content-text positive-emotion">• 동일 브랜드 선호</text>
+
+  <text x="1010" y="400" class="content-text negative-emotion">• A/S 접근성 부족</text>
+  <text x="1010" y="415" class="content-text negative-emotion">• 소프트웨어 지원 중단</text>
+  <text x="1010" y="430" class="content-text negative-emotion">• 저장공간 부족</text>
+  <text x="1010" y="445" class="content-text negative-emotion">• 최신 기능 한계</text>
+
+  <!-- 하단 통계 정보 -->
+  <rect x="50" y="510" width="1100" height="140" fill="white" stroke="#ddd" stroke-width="1"/>
+  <text x="70" y="530" class="category-text" style="font-weight: bold;">주요 발견사항</text>
+
+  <text x="70" y="550" class="content-text">• 정보 복잡성: 너무 많은 정보로 인한 선택 어려움 (가장 큰 페인포인트)</text>
+  <text x="70" y="565" class="content-text">• 체험 기회 부족: 실제 사용감 확인 어려움</text>
+  <text x="70" y="580" class="content-text">• 가격 투명성 부족: 최종 가격 예측 어려움</text>
+  <text x="70" y="595" class="content-text">• 고객별 맞춤 서비스 부족: 연령대별, 용도별 특화 서비스 부재</text>
+  <text x="70" y="610" class="content-text">• 사후 지원 접근성: A/S, 사용법 지원 어려움</text>
+
+  <!-- 범례 -->
+  <circle cx="950" cy="550" r="5" fill="#4CAF50"/>
+  <text x="965" y="555" class="content-text">좋은 느낌</text>
+  <circle cx="950" cy="570" r="5" fill="#F44336"/>
+  <text x="965" y="575" class="content-text">나쁜 느낌</text>
+  <line x1="950" y1="590" x2="970" y2="590" stroke="#FF9800" stroke-width="3"/>
+  <text x="975" y="595" class="content-text">감정 변화</text>
+</svg>
