@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="800" height="600" fill="#f8f9fa"/>
+
+  <!-- 제목 -->
+  <text x="400" y="30" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">솔루션 우선순위 평가 매트릭스</text>
+
+  <!-- 축 -->
+  <line x1="80" y1="550" x2="720" y2="550" stroke="#333" stroke-width="2"/>
+  <line x1="80" y1="550" x2="80" y2="80" stroke="#333" stroke-width="2"/>
+
+  <!-- X축 라벨 (실현가능성) -->
+  <text x="400" y="580" text-anchor="middle" font-size="16" font-weight="bold">실현가능성</text>
+  <text x="120" y="570" text-anchor="middle" font-size="12">낮음</text>
+  <text x="680" y="570" text-anchor="middle" font-size="12">높음</text>
+
+  <!-- Y축 라벨 (비즈니스 영향도) -->
+  <text x="25" y="320" text-anchor="middle" font-size="16" font-weight="bold" transform="rotate(-90, 25, 320)">비즈니스 영향도</text>
+  <text x="60" y="540" text-anchor="middle" font-size="12">낮음</text>
+  <text x="60" y="100" text-anchor="middle" font-size="12">높음</text>
+
+  <!-- 영역 구분선 -->
+  <line x1="400" y1="80" x2="400" y2="550" stroke="#ccc" stroke-width="1" stroke-dasharray="5,5"/>
+  <line x1="80" y1="315" x2="720" y2="315" stroke="#ccc" stroke-width="1" stroke-dasharray="5,5"/>
+
+  <!-- 영역 라벨 -->
+  <rect x="85" y="85" width="310" height="225" fill="#e3f2fd" opacity="0.3"/>
+  <text x="240" y="110" text-anchor="middle" font-size="18" font-weight="bold" fill="#1976d2">Big Bets</text>
+
+  <rect x="405" y="85" width="310" height="225" fill="#e8f5e8" opacity="0.3"/>
+  <text x="560" y="110" text-anchor="middle" font-size="18" font-weight="bold" fill="#388e3c">No Brainers</text>
+
+  <rect x="85" y="320" width="310" height="225" fill="#ffebee" opacity="0.3"/>
+  <text x="240" y="345" text-anchor="middle" font-size="18" font-weight="bold" fill="#d32f2f">Unwise</text>
+
+  <rect x="405" y="320" width="310" height="225" fill="#fff3e0" opacity="0.3"/>
+  <text x="560" y="345" text-anchor="middle" font-size="18" font-weight="bold" fill="#f57c00">Utilities</text>
+
+  <!-- 데이터 포인트 -->
+
+  <!-- No Brainers -->
+  <circle cx="620" cy="240" r="8" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
+  <text x="620" y="246" text-anchor="middle" font-size="12" font-weight="bold" fill="white">S1</text>
+
+  <circle cx="620" cy="200" r="8" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
+  <text x="620" y="206" text-anchor="middle" font-size="12" font-weight="bold" fill="white">S3</text>
+
+  <!-- Big Bets -->
+  <circle cx="200" cy="160" r="8" fill="#2196f3" stroke="#1565c0" stroke-width="2"/>
+  <text x="200" y="166" text-anchor="middle" font-size="12" font-weight="bold" fill="white">S4</text>
+
+  <circle cx="120" cy="160" r="8" fill="#2196f3" stroke="#1565c0" stroke-width="2"/>
+  <text x="120" y="166" text-anchor="middle" font-size="12" font-weight="bold" fill="white">S10</text>
+
+  <circle cx="120" cy="140" r="8" fill="#2196f3" stroke="#1565c0" stroke-width="2"/>
+  <text x="120" y="146" text-anchor="middle" font-size="12" font-weight="bold" fill="white">S11</text>
+
+  <circle cx="120" cy="120" r="8" fill="#2196f3" stroke="#1565c0" stroke-width="2"/>
+  <text x="120" y="126" text-anchor="middle" font-size="12" font-weight="bold" fill="white">S13</text>
+
+  <circle cx="200" cy="180" r="8" fill="#2196f3" stroke="#1565c0" stroke-width="2"/>
+  <text x="200" y="186" text-anchor="middle" font-size="12" font-weight="bold" fill="white">S7</text>
+
+  <!-- Utilities -->
+  <circle cx="680" cy="420" r="8" fill="#ff9800" stroke="#e65100" stroke-width="2"/>
+  <text x="680" y="426" text-anchor="middle" font-size="12" font-weight="bold" fill="white">S2</text>
+
+  <circle cx="620" cy="400" r="8" fill="#ff9800" stroke="#e65100" stroke-width="2"/>
+  <text x="620" y="406" text-anchor="middle" font-size="12" font-weight="bold" fill="white">S5</text>
+
+  <circle cx="620" cy="380" r="8" fill="#ff9800" stroke="#e65100" stroke-width="2"/>
+  <text x="620" y="386" text-anchor="middle" font-size="12" font-weight="bold" fill="white">S6</text>
+
+  <circle cx="620" cy="360" r="8" fill="#ff9800" stroke="#e65100" stroke-width="2"/>
+  <text x="620" y="366" text-anchor="middle" font-size="12" font-weight="bold" fill="white">S8</text>
+
+  <circle cx="450" cy="420" r="8" fill="#ff9800" stroke="#e65100" stroke-width="2"/>
+  <text x="450" y="426" text-anchor="middle" font-size="12" font-weight="bold" fill="white">S14</text>
+
+  <!-- Unwise -->
+  <circle cx="150" cy="480" r="6" fill="#f44336" stroke="#c62828" stroke-width="2"/>
+  <text x="150" y="485" text-anchor="middle" font-size="10" font-weight="bold" fill="white">S15</text>
+
+  <circle cx="120" cy="480" r="6" fill="#f44336" stroke="#c62828" stroke-width="2"/>
+  <text x="120" y="485" text-anchor="middle" font-size="10" font-weight="bold" fill="white">S16</text>
+
+  <circle cx="120" cy="460" r="6" fill="#f44336" stroke="#c62828" stroke-width="2"/>
+  <text x="120" y="465" text-anchor="middle" font-size="10" font-weight="bold" fill="white">S18</text>
+
+  <circle cx="120" cy="440" r="6" fill="#f44336" stroke="#c62828" stroke-width="2"/>
+  <text x="120" y="445" text-anchor="middle" font-size="10" font-weight="bold" fill="white">S19</text>
+
+  <circle cx="120" cy="420" r="6" fill="#f44336" stroke="#c62828" stroke-width="2"/>
+  <text x="120" y="425" text-anchor="middle" font-size="10" font-weight="bold" fill="white">S20</text>
+
+  <circle cx="120" cy="500" r="6" fill="#f44336" stroke="#c62828" stroke-width="2"/>
+  <text x="120" y="505" text-anchor="middle" font-size="10" font-weight="bold" fill="white">기타</text>
+
+  <!-- 범례 -->
+  <text x="50" y="600" font-size="14" font-weight="bold">범례:</text>
+
+  <!-- No Brainers 범례 -->
+  <text x="80" y="620" font-size="12" font-weight="bold" fill="#388e3c">No Brainers:</text>
+  <text x="80" y="635" font-size="11">S1: 가성비 점수 자동 계산</text>
+  <text x="80" y="650" font-size="11">S3: 반응형 비교 카드</text>
+
+  <!-- Big Bets 범례 -->
+  <text x="280" y="620" font-size="12" font-weight="bold" fill="#1976d2">Big Bets:</text>
+  <text x="280" y="635" font-size="11">S4: 간편 비교 도구</text>
+  <text x="280" y="650" font-size="11">S7: 마이크로 인터랙션 중심 UI</text>
+  <text x="280" y="665" font-size="11">S10: AI 기반 개인화 추천</text>
+  <text x="280" y="680" font-size="11">S11: 통합 신뢰성 보장 시스템</text>
+  <text x="280" y="695" font-size="11">S13: 실시간 시장 분석 대시보드</text>
+
+  <!-- Utilities 범례 -->
+  <text x="520" y="620" font-size="12" font-weight="bold" fill="#f57c00">Utilities:</text>
+  <text x="520" y="635" font-size="11">S2: 진행 상황 시각화</text>
+  <text x="520" y="650" font-size="11">S5: API 기반 가격 비교 허브</text>
+  <text x="520" y="665" font-size="11">S6: 원클릭 설정 복사</text>
+  <text x="520" y="680" font-size="11">S8: 구매 패턴 기반 알림</text>
+  <text x="520" y="695" font-size="11">S14: 실시간 사용자 경험 모니터링</text>
+
+  <!-- Unwise 범례 -->
+  <text x="720" y="620" font-size="12" font-weight="bold" fill="#d32f2f">Unwise:</text>
+  <text x="720" y="635" font-size="11">S15~S20: 기타 저점수 솔루션들</text>
+</svg>
