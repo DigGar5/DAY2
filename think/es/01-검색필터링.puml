@@ -1,0 +1,66 @@
+@startuml 01-검색필터링
+!theme mono
+
+title 01. 핸드폰 검색 및 필터링 플로우
+
+actor "사용자" as User
+participant "검색 인터페이스" as UI
+participant "검색 서비스" as SearchService
+database "상품 데이터베이스" as ProductDB
+system "재고 관리 시스템" as InventorySystem
+
+== 이벤트스토밍 요소 ==
+
+note over User, InventorySystem
+**이벤트**: 검색조건입력됨, 필터적용됨, 상품검색실행됨, 재고확인완료됨, 검색결과반환됨
+**커맨드**: 핸드폰검색, 필터적용, 결과정렬, 재고확인
+**Policy/Rule**: 재고있는상품만표시, 가격범위검증, 최대검색결과수제한
+**데이터**: 검색키워드, 가격범위, 브랜드필터, 성능필터, 재고상태
+end note
+
+== 검색 및 필터링 시퀀스 ==
+
+User -> UI : 검색키워드 입력\n데이터: {검색어, 카테고리}
+activate UI
+UI -> UI : 검색조건입력됨 이벤트 발생
+
+User -> UI : 필터 조건 설정\n데이터: {가격범위, 브랜드필터, 성능필터}
+UI -> UI : 필터적용됨 이벤트 발생
+note right : **Policy**: 가격범위검증
+
+UI -> SearchService : 핸드폰검색 커맨드 실행\n데이터: {검색조건, 필터조건}
+activate SearchService
+SearchService -> SearchService : 상품검색실행됨 이벤트 발생
+
+SearchService -> ProductDB : 상품 정보 조회\n데이터: {검색키워드, 필터조건}
+activate ProductDB
+ProductDB --> SearchService : 상품 목록 반환\n데이터: {상품ID, 상품명, 가격, 성능점수}
+deactivate ProductDB
+
+SearchService -> InventorySystem : 재고확인 커맨드 실행\n데이터: {상품ID목록}
+activate InventorySystem
+InventorySystem -> InventorySystem : 재고확인완료됨 이벤트 발생
+InventorySystem --> SearchService : 재고 상태 반환\n데이터: {상품ID, 재고수량, 재고상태}
+deactivate InventorySystem
+
+SearchService -> SearchService : 결과정렬 커맨드 실행
+note right : **Policy**: 재고있는상품만표시\n**Policy**: 최대검색결과수제한
+
+SearchService -> SearchService : 검색결과반환됨 이벤트 발생
+SearchService --> UI : 필터링된 검색 결과\n데이터: {상품목록, 총개수, 정렬기준}
+deactivate SearchService
+
+UI --> User : 검색 결과 표시\n데이터: {상품카드, 가격정보, 재고상태}
+deactivate UI
+
+== 후속 액션 ==
+
+alt 가성비 점수 계산 요청
+    User -> UI : 가성비 점수 계산 요청
+    UI -> SearchService : 02-점수계산 플로우 연결
+else 검색 조건 변경
+    User -> UI : 검색 조건 재설정
+    note right : 동일 플로우 반복
+end
+
+@enduml

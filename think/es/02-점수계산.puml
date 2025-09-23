@@ -1,0 +1,81 @@
+@startuml 02-점수계산
+!theme mono
+
+title 02. 가성비 점수 계산 요청 플로우
+
+actor "사용자" as User
+participant "가성비 인터페이스" as UI
+participant "점수 계산 엔진" as ScoreEngine
+system "가격 비교 API" as PriceAPI
+system "리뷰 시스템" as ReviewSystem
+database "성능 벤치마크 DB" as BenchmarkDB
+
+== 이벤트스토밍 요소 ==
+
+note over User, BenchmarkDB
+**이벤트**: 가성비계산요청됨, 가격정보수집완료됨, 리뷰점수수집완료됨, 성능지표수집완료됨, 점수계산시작됨, 점수계산완료됨
+**커맨드**: 가성비점수계산요청, 최신가격수집, 리뷰점수수집, 성능지표수집, 계산알고리즘실행
+**Policy/Rule**: 최신가격반영(1시간이내), 리뷰점수가중치적용, 성능지표정규화(0-100스케일)
+**데이터**: 상품ID, 현재가격, 성능점수, 리뷰평점, 리뷰개수, 가중치설정
+end note
+
+== 가성비 점수 계산 시퀀스 ==
+
+User -> UI : 가성비 점수 계산 요청\n데이터: {상품ID, 계산옵션}
+activate UI
+UI -> UI : 가성비계산요청됨 이벤트 발생
+
+UI -> ScoreEngine : 가성비점수계산요청 커맨드 실행\n데이터: {상품ID, 사용자가중치}
+activate ScoreEngine
+
+== 병렬 데이터 수집 ==
+
+par 가격 정보 수집
+    ScoreEngine -> PriceAPI : 최신가격수집 커맨드 실행\n데이터: {상품ID}
+    activate PriceAPI
+    PriceAPI -> PriceAPI : 가격정보수집완료됨 이벤트 발생
+    note right : **Policy**: 최신가격반영(1시간이내)
+    PriceAPI --> ScoreEngine : 현재 가격 정보\n데이터: {상품ID, 현재가격, 최저가, 평균가격}
+    deactivate PriceAPI
+
+and 리뷰 점수 수집
+    ScoreEngine -> ReviewSystem : 리뷰점수수집 커맨드 실행\n데이터: {상품ID}
+    activate ReviewSystem
+    ReviewSystem -> ReviewSystem : 리뷰점수수집완료됨 이벤트 발생
+    note right : **Policy**: 리뷰점수가중치적용\n(리뷰 개수 고려)
+    ReviewSystem --> ScoreEngine : 리뷰 점수 정보\n데이터: {상품ID, 평균평점, 리뷰개수, 신뢰도}
+    deactivate ReviewSystem
+
+and 성능 지표 수집
+    ScoreEngine -> BenchmarkDB : 성능지표수집 커맨드 실행\n데이터: {상품ID}
+    activate BenchmarkDB
+    BenchmarkDB -> BenchmarkDB : 성능지표수집완료됨 이벤트 발생
+    note right : **Policy**: 성능지표정규화(0-100스케일)
+    BenchmarkDB --> ScoreEngine : 성능 벤치마크 점수\n데이터: {상품ID, CPU점수, 메모리점수, 배터리점수}
+    deactivate BenchmarkDB
+end
+
+== 점수 계산 실행 ==
+
+ScoreEngine -> ScoreEngine : 점수계산시작됨 이벤트 발생
+ScoreEngine -> ScoreEngine : 계산알고리즘실행 커맨드 실행
+note right : **알고리즘**\n가성비점수 = (성능점수 × 성능가중치 + 리뷰점수 × 리뷰가중치) ÷ 정규화가격\n데이터: {모든수집데이터, 가중치설정}
+
+ScoreEngine -> ScoreEngine : 점수계산완료됨 이벤트 발생
+ScoreEngine --> UI : 가성비 점수 결과\n데이터: {상품ID, 가성비점수, 계산근거, 업데이트시간}
+deactivate ScoreEngine
+
+UI --> User : 가성비 점수 표시\n데이터: {점수표시, 계산상세, 비교차트}
+deactivate UI
+
+== 후속 액션 ==
+
+alt 점수 상세 조회
+    User -> UI : 점수 상세 정보 요청
+    UI -> ScoreEngine : 03-결과조회 플로우 연결
+else 기준 커스터마이징
+    User -> UI : 가중치 설정 변경 요청
+    UI -> ScoreEngine : 04-기준커스터마이징 플로우 연결
+end
+
+@enduml

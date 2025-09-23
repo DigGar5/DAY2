@@ -1,0 +1,106 @@
+@startuml 06-피드백제공
+!theme mono
+
+title 06. 가성비 점수 피드백 제공 플로우
+
+actor "사용자" as User
+actor "시스템관리자" as Admin
+participant "피드백 인터페이스" as UI
+participant "피드백 처리 서비스" as FeedbackService
+database "피드백 DB" as FeedbackDB
+system "분석 시스템" as AnalysisSystem
+system "알고리즘 개선 엔진" as ImprovementEngine
+
+== 이벤트스토밍 요소 ==
+
+note over User, ImprovementEngine
+**이벤트**: 피드백요청됨, 사용자경험수집됨, 피드백분석완료됨, 점수알고리즘개선됨, 개선사항적용됨
+**커맨드**: 피드백제출, 만족도평가, 개선사항건의, 피드백분석, 알고리즘조정
+**Policy/Rule**: 익명피드백허용, 부적절내용필터링, 피드백반영주기(주단위)
+**데이터**: 만족도점수, 피드백내용, 사용패턴, 개선제안, 알고리즘파라미터
+end note
+
+== 사용자 피드백 수집 시퀀스 ==
+
+User -> UI : 피드백 화면 접근\n데이터: {사용자ID, 피드백대상상품}
+activate UI
+UI -> UI : 피드백요청됨 이벤트 발생
+
+User -> UI : 만족도 평가 및 의견 입력\n데이터: {점수만족도, 계산정확성, 추천품질, 자유의견}
+UI -> UI : 사용자경험수집됨 이벤트 발생
+
+UI -> FeedbackService : 피드백제출 커맨드 실행\n데이터: {피드백내용, 평가점수, 사용자패턴}
+activate FeedbackService
+
+FeedbackService -> FeedbackService : 부적절내용필터링 검사
+note right : **Policy**: 부적절내용필터링\n(욕설, 광고, 스팸 제거)
+
+alt 피드백 내용 적절
+    FeedbackService -> FeedbackDB : 피드백 데이터 저장\n데이터: {정제된피드백, 분류태그, 중요도}
+    activate FeedbackDB
+    FeedbackDB --> FeedbackService : 저장 완료 확인
+    deactivate FeedbackDB
+
+    FeedbackService --> UI : 피드백 제출 완료\n데이터: {성공메시지, 감사인사}
+    UI --> User : 제출 완료 안내\n데이터: {완료확인, 포인트적립안내}
+else 부적절 내용 감지
+    FeedbackService --> UI : 재입력 요청\n데이터: {필터링사유, 수정가이드}
+    UI --> User : 수정 요청 메시지
+end
+deactivate FeedbackService
+deactivate UI
+
+== 관리자 분석 및 개선 시퀀스 ==
+
+Admin -> FeedbackService : 피드백 분석 요청\n데이터: {분석기간, 분석범위}
+activate FeedbackService
+
+FeedbackService -> AnalysisSystem : 피드백분석 커맨드 실행\n데이터: {수집된피드백데이터}
+activate AnalysisSystem
+
+AnalysisSystem -> FeedbackDB : 피드백 데이터 조회\n데이터: {기간별피드백, 패턴분석}
+activate FeedbackDB
+FeedbackDB --> AnalysisSystem : 분석 대상 데이터\n데이터: {피드백통계, 만족도추이, 개선요청사항}
+deactivate FeedbackDB
+
+AnalysisSystem -> AnalysisSystem : 피드백분석완료됨 이벤트 발생
+AnalysisSystem --> FeedbackService : 분석 결과\n데이터: {문제점식별, 개선우선순위, 사용자요구사항}
+deactivate AnalysisSystem
+
+== 알고리즘 개선 적용 ==
+
+FeedbackService -> ImprovementEngine : 알고리즘조정 커맨드 실행\n데이터: {분석결과, 개선방향}
+activate ImprovementEngine
+
+ImprovementEngine -> ImprovementEngine : 점수알고리즘개선됨 이벤트 발생
+note right : **개선 사례**\n- 가중치 조정\n- 새로운 지표 추가\n- 계산 로직 정밀화
+
+ImprovementEngine -> ImprovementEngine : 개선사항적용됨 이벤트 발생
+note right : **Policy**: 피드백반영주기(주단위)\nA/B 테스트를 통한 점진적 적용
+
+ImprovementEngine --> FeedbackService : 개선 적용 결과\n데이터: {적용된개선사항, 예상효과, 모니터링계획}
+deactivate ImprovementEngine
+
+FeedbackService --> Admin : 개선 보고서\n데이터: {개선내역, 적용일정, 성과측정방법}
+deactivate FeedbackService
+
+== 개선 효과 검증 ==
+
+note over AnalysisSystem, ImprovementEngine
+개선된 알고리즘의 효과를 지속적으로 모니터링
+- 사용자 만족도 변화 추적
+- 점수 정확성 개선 측정
+- 추천 품질 향상 확인
+end note
+
+== 순환 개선 구조 ==
+
+alt 개선 효과 확인
+    Admin -> AnalysisSystem : 효과 측정 분석
+    note right : 지속적인 품질 개선 사이클
+else 추가 개선 필요
+    Admin -> ImprovementEngine : 추가 개선 사항 적용
+    note right : 사용자 피드백 기반 반복 개선
+end
+
+@enduml

@@ -1,0 +1,87 @@
+@startuml 05-상품추천
+!theme mono
+
+title 05. 가성비 기반 상품 추천 플로우
+
+actor "사용자" as User
+participant "추천 인터페이스" as UI
+participant "추천 엔진" as RecommendationEngine
+database "상품 DB" as ProductDB
+system "재고 시스템" as InventorySystem
+system "점수 계산 엔진" as ScoreEngine
+
+== 이벤트스토밍 요소 ==
+
+note over User, ScoreEngine
+**이벤트**: 추천요청됨, 점수기반필터링됨, 재고확인완료됨, 추천목록생성됨, 추천이유생성됨
+**커맨드**: 추천상품검색, 점수순정렬, 추천이유제공, 재고확인, 개인화필터적용
+**Policy/Rule**: 최소점수임계값적용(70점이상), 재고확인필수, 예산범위내상품만표시
+**데이터**: 예산범위, 선호브랜드, 최소성능요구사항, 개인화가중치, 추천점수
+end note
+
+== 가성비 기반 추천 시퀀스 ==
+
+User -> UI : 상품 추천 요청\n데이터: {예산범위, 선호조건, 필수요구사항}
+activate UI
+UI -> UI : 추천요청됨 이벤트 발생
+
+UI -> RecommendationEngine : 추천상품검색 커맨드 실행\n데이터: {사용자조건, 개인화설정}
+activate RecommendationEngine
+
+RecommendationEngine -> ScoreEngine : 가성비 점수 기준 필터링\n데이터: {전체상품목록, 사용자가중치}
+activate ScoreEngine
+ScoreEngine -> ScoreEngine : 점수기반필터링됨 이벤트 발생
+note right : **Policy**: 최소점수임계값적용(70점이상)
+ScoreEngine --> RecommendationEngine : 고득점 상품 목록\n데이터: {상품ID목록, 개인화점수, 순위}
+deactivate ScoreEngine
+
+RecommendationEngine -> ProductDB : 상품 상세 정보 조회\n데이터: {고득점상품ID목록}
+activate ProductDB
+ProductDB --> RecommendationEngine : 상품 세부 정보\n데이터: {상품명, 가격, 사양, 브랜드정보}
+deactivate ProductDB
+
+RecommendationEngine -> InventorySystem : 재고확인 커맨드 실행\n데이터: {추천상품ID목록}
+activate InventorySystem
+InventorySystem -> InventorySystem : 재고확인완료됨 이벤트 발생
+note right : **Policy**: 재고확인필수
+InventorySystem --> RecommendationEngine : 재고 상태 정보\n데이터: {상품별재고수량, 배송가능일}
+deactivate InventorySystem
+
+RecommendationEngine -> RecommendationEngine : 점수순정렬 커맨드 실행
+note right : **Policy**: 예산범위내상품만표시
+
+RecommendationEngine -> RecommendationEngine : 추천목록생성됨 이벤트 발생
+
+== 추천 이유 생성 ==
+
+RecommendationEngine -> RecommendationEngine : 추천이유제공 커맨드 실행
+RecommendationEngine -> RecommendationEngine : 추천이유생성됨 이벤트 발생
+
+RecommendationEngine --> UI : 개인화 추천 결과\n데이터: {추천상품목록, 추천이유, 가성비점수, 대안상품}
+deactivate RecommendationEngine
+
+UI --> User : 추천 상품 표시\n데이터: {추천카드, 점수표시, 추천근거, 비교옵션}
+deactivate UI
+
+== 사용자 반응 분석 ==
+
+alt 추천 상품 선택
+    User -> UI : 추천 상품 상세 조회
+    UI -> RecommendationEngine : 03-결과조회 플로우 연결
+else 다른 조건으로 재추천
+    User -> UI : 추천 조건 변경
+    UI -> RecommendationEngine : 동일 플로우 반복 (조건 변경)
+else 추천 결과 피드백
+    User -> UI : 추천 만족도 평가
+    UI -> RecommendationEngine : 06-피드백제공 플로우 연결
+end
+
+== 학습 데이터 수집 ==
+
+note over RecommendationEngine
+사용자의 클릭, 체류시간, 선택 패턴을 수집하여
+추천 알고리즘 개선에 활용
+데이터: {클릭패턴, 선택상품, 만족도, 구매전환}
+end note
+
+@enduml

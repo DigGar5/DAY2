@@ -1,0 +1,43 @@
+@startuml userflow
+!theme mono
+
+title 가성비 점수 자동 계산 시스템 - 유저플로우 연결도
+
+actor "사용자" as User
+actor "시스템관리자" as Admin
+participant "핸드폰 검색 및 필터링\n(01-검색필터링)" as Flow01
+participant "가성비 점수 계산 요청\n(02-점수계산)" as Flow02
+participant "가성비 점수 결과 조회\n(03-결과조회)" as Flow03
+participant "가성비 기준 커스터마이징\n(04-기준커스터마이징)" as Flow04
+participant "가성비 기반 상품 추천\n(05-상품추천)" as Flow05
+participant "가성비 점수 피드백 제공\n(06-피드백제공)" as Flow06
+
+== 사용자 주요 여정 플로우 ==
+
+User -> Flow01 : 1. 핸드폰 검색 시작
+Flow01 -> Flow02 : 2. 검색 결과에서 가성비 계산 요청
+Flow02 -> Flow03 : 3. 점수 계산 완료 후 결과 조회
+Flow03 -> Flow04 : 4. 점수 기준 개인화 설정
+Flow03 -> Flow05 : 5. 가성비 기반 추천 요청
+Flow04 -> Flow02 : 6. 커스터마이징된 기준으로 재계산
+Flow05 -> Flow06 : 7. 추천 결과에 대한 피드백 제공
+Flow05 -> Flow01 : 8. 추천 상품에서 재검색
+
+== 관리자 운영 플로우 ==
+
+Admin -> Flow06 : 9. 피드백 데이터 분석
+Flow06 -> Flow02 : 10. 점수 계산 알고리즘 개선
+Flow06 -> Flow05 : 11. 추천 엔진 최적화
+
+== 순환 구조 ==
+
+note over Flow01, Flow06
+사용자는 검색→계산→조회→커스터마이징의
+순환 구조로 서비스를 이용하며,
+피드백을 통해 시스템이 지속적으로 개선됩니다.
+
+핵심 가치: 개인화된 가성비 평가를 통한
+최적의 구매 의사결정 지원
+end note
+
+@enduml

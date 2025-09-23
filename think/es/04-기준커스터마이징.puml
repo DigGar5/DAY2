@@ -1,0 +1,87 @@
+@startuml 04-기준커스터마이징
+!theme mono
+
+title 04. 가성비 기준 커스터마이징 플로우
+
+actor "사용자" as User
+participant "설정 인터페이스" as UI
+participant "개인화 서비스" as PersonalizationService
+database "사용자 설정 DB" as UserSettingsDB
+system "점수 계산 엔진" as ScoreEngine
+
+== 이벤트스토밍 요소 ==
+
+note over User, ScoreEngine
+**이벤트**: 기준설정요청됨, 가중치조정됨, 설정유효성검증됨, 개인화점수생성됨, 설정저장완료됨
+**커맨드**: 가중치설정, 기준저장, 개인화점수재계산, 설정유효성검증
+**Policy/Rule**: 가중치합계100%제한, 설정값범위검증(0-100%), 기본값제공
+**데이터**: 가격가중치, 성능가중치, 리뷰가중치, 사용자ID, 기본설정값
+end note
+
+== 개인화 기준 설정 시퀀스 ==
+
+User -> UI : 가중치 설정 화면 요청\n데이터: {사용자ID}
+activate UI
+UI -> UI : 기준설정요청됨 이벤트 발생
+
+UI -> PersonalizationService : 현재 설정 조회\n데이터: {사용자ID}
+activate PersonalizationService
+
+PersonalizationService -> UserSettingsDB : 사용자 기본 설정 조회\n데이터: {사용자ID}
+activate UserSettingsDB
+UserSettingsDB --> PersonalizationService : 현재 가중치 설정\n데이터: {가격가중치, 성능가중치, 리뷰가중치, 기타옵션}
+deactivate UserSettingsDB
+
+PersonalizationService --> UI : 현재 설정 정보\n데이터: {현재가중치, 기본값, 설정옵션}
+deactivate PersonalizationService
+
+UI --> User : 설정 화면 표시\n데이터: {가중치슬라이더, 미리보기, 설명}
+deactivate UI
+
+== 가중치 조정 ==
+
+User -> UI : 가중치 값 조정\n데이터: {새로운가중치설정}
+activate UI
+UI -> UI : 가중치조정됨 이벤트 발생
+
+UI -> UI : 설정유효성검증 커맨드 실행
+note right : **Policy**: 가중치합계100%제한\n**Policy**: 설정값범위검증(0-100%)
+
+alt 유효성 검증 성공
+    UI -> UI : 설정유효성검증됨 이벤트 발생
+    UI -> PersonalizationService : 가중치설정 커맨드 실행\n데이터: {조정된가중치, 사용자ID}
+    activate PersonalizationService
+
+    PersonalizationService -> ScoreEngine : 개인화점수재계산 커맨드 실행\n데이터: {상품목록, 새로운가중치}
+    activate ScoreEngine
+    ScoreEngine -> ScoreEngine : 개인화점수생성됨 이벤트 발생
+    ScoreEngine --> PersonalizationService : 재계산된 점수\n데이터: {상품별개인화점수, 순위변화}
+    deactivate ScoreEngine
+
+    PersonalizationService -> UserSettingsDB : 기준저장 커맨드 실행\n데이터: {사용자ID, 새로운가중치설정}
+    activate UserSettingsDB
+    UserSettingsDB -> UserSettingsDB : 설정저장완료됨 이벤트 발생
+    UserSettingsDB --> PersonalizationService : 저장 완료 확인
+    deactivate UserSettingsDB
+
+    PersonalizationService --> UI : 설정 적용 결과\n데이터: {적용완료상태, 변경된점수미리보기}
+    deactivate PersonalizationService
+
+    UI --> User : 설정 적용 완료 안내\n데이터: {성공메시지, 점수변화미리보기}
+else 유효성 검증 실패
+    UI --> User : 오류 메시지 표시\n데이터: {오류내용, 수정가이드}
+    note right : **Policy**: 가중치 합계 오류 또는 범위 초과
+end
+deactivate UI
+
+== 후속 액션 ==
+
+alt 재계산된 점수 확인
+    User -> UI : 새로운 점수로 결과 조회
+    UI -> PersonalizationService : 02-점수계산 플로우 연결 (개인화 기준 적용)
+else 추천 상품 확인
+    User -> UI : 개인화된 추천 요청
+    UI -> PersonalizationService : 05-상품추천 플로우 연결
+end
+
+@enduml

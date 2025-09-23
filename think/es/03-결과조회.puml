@@ -1,0 +1,66 @@
+@startuml 03-결과조회
+!theme mono
+
+title 03. 가성비 점수 결과 조회 플로우
+
+actor "사용자" as User
+participant "점수 상세 인터페이스" as UI
+participant "점수 분석 서비스" as AnalysisService
+database "점수 이력 DB" as ScoreHistoryDB
+system "점수 계산 엔진" as ScoreEngine
+
+== 이벤트스토밍 요소 ==
+
+note over User, ScoreEngine
+**이벤트**: 점수결과요청됨, 점수상세정보로드됨, 점수설명표시됨, 이력조회완료됨
+**커맨드**: 점수결과조회, 상세분석표시, 점수근거제공, 계산이력조회
+**Policy/Rule**: 점수산출근거투명공개, 실시간데이터반영, 이력보관30일
+**데이터**: 점수값, 계산근거, 가중치정보, 업데이트시간, 점수이력
+end note
+
+== 점수 결과 상세 조회 시퀀스 ==
+
+User -> UI : 점수 상세 정보 요청\n데이터: {상품ID, 조회옵션}
+activate UI
+UI -> UI : 점수결과요청됨 이벤트 발생
+
+UI -> AnalysisService : 점수결과조회 커맨드 실행\n데이터: {상품ID, 사용자ID}
+activate AnalysisService
+
+AnalysisService -> ScoreEngine : 최신 점수 정보 요청\n데이터: {상품ID}
+activate ScoreEngine
+ScoreEngine --> AnalysisService : 현재 점수 및 계산 근거\n데이터: {가성비점수, 세부점수, 가중치적용결과}
+deactivate ScoreEngine
+
+AnalysisService -> AnalysisService : 점수상세정보로드됨 이벤트 발생
+
+AnalysisService -> AnalysisService : 상세분석표시 커맨드 실행
+note right : **Policy**: 점수산출근거투명공개
+
+AnalysisService -> ScoreHistoryDB : 계산이력조회 커맨드 실행\n데이터: {상품ID, 기간설정}
+activate ScoreHistoryDB
+ScoreHistoryDB -> ScoreHistoryDB : 이력조회완료됨 이벤트 발생
+note right : **Policy**: 이력보관30일
+ScoreHistoryDB --> AnalysisService : 점수 변화 이력\n데이터: {날짜별점수, 변화요인, 시장동향}
+deactivate ScoreHistoryDB
+
+AnalysisService -> AnalysisService : 점수근거제공 커맨드 실행
+AnalysisService -> AnalysisService : 점수설명표시됨 이벤트 발생
+
+AnalysisService --> UI : 상세 분석 결과\n데이터: {점수분해도, 계산과정, 비교분석, 추세그래프}
+deactivate AnalysisService
+
+UI --> User : 점수 상세 정보 표시\n데이터: {점수상세화면, 계산근거, 변화추이}
+deactivate UI
+
+== 후속 액션 ==
+
+alt 기준 커스터마이징
+    User -> UI : 가중치 조정 요청
+    UI -> AnalysisService : 04-기준커스터마이징 플로우 연결
+else 추천 상품 보기
+    User -> UI : 유사 상품 추천 요청
+    UI -> AnalysisService : 05-상품추천 플로우 연결
+end
+
+@enduml
