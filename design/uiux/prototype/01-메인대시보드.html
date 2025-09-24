@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartChoice - 똑똑한 핸드폰 선택의 시작</title>
+    <style>
+        :root {
+            /* Primary Colors */
+            --primary-50: #EFF6FF;
+            --primary-100: #DBEAFE;
+            --primary-200: #BFDBFE;
+            --primary-300: #93C5FD;
+            --primary-400: #60A5FA;
+            --primary-500: #3B82F6;
+            --primary-600: #2563EB;
+            --primary-700: #1D4ED8;
+            --primary-800: #1E40AF;
+            --primary-900: #1E3A8A;
+
+            /* Secondary Colors */
+            --secondary-50: #FFF7ED;
+            --secondary-100: #FFEDD5;
+            --secondary-200: #FED7AA;
+            --secondary-300: #FDBA74;
+            --secondary-400: #FB923C;
+            --secondary-500: #F97316;
+            --secondary-600: #EA580C;
+            --secondary-700: #C2410C;
+            --secondary-800: #9A3412;
+            --secondary-900: #7C2D12;
+
+            /* Status Colors */
+            --success-50: #F0FDF4;
+            --success-500: #22C55E;
+            --success-600: #16A34A;
+            --warning-50: #FFFBEB;
+            --warning-500: #EAB308;
+            --warning-600: #CA8A04;
+            --error-50: #FEF2F2;
+            --error-500: #EF4444;
+            --error-600: #DC2626;
+            --info-50: #F0F9FF;
+            --info-500: #06B6D4;
+            --info-600: #0891B2;
+
+            /* Gray Scale */
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+
+            /* Typography */
+            --font-korean: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-english: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Monaco', 'Cascadia Code', monospace;
+
+            /* Spacing */
+            --space-1: 4px;
+            --space-2: 8px;
+            --space-3: 12px;
+            --space-4: 16px;
+            --space-5: 20px;
+            --space-6: 24px;
+            --space-8: 32px;
+            --space-10: 40px;
+            --space-12: 48px;
+            --space-16: 64px;
+            --space-20: 80px;
+
+            /* Animation */
+            --duration-fast: 0.15s;
+            --duration-normal: 0.2s;
+            --duration-slow: 0.3s;
+            --ease-out: cubic-bezier(0.25, 0.8, 0.25, 1);
+            --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-korean);
+            line-height: 1.5;
+            color: var(--gray-800);
+            background-color: var(--gray-50);
+        }
+
+        /* Container */
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 var(--space-4);
+        }
+
+        @media (min-width: 640px) {
+            .container { max-width: 640px; }
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 768px;
+                padding: 0 var(--space-6);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 1024px;
+                padding: 0 var(--space-8);
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .container { max-width: 1280px; }
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-4) 0;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-600);
+            text-decoration: none;
+            font-family: var(--font-english);
+        }
+
+        .nav {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .nav {
+                display: flex;
+                gap: var(--space-8);
+            }
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--gray-600);
+            font-weight: 500;
+            transition: color var(--duration-normal) var(--ease-out);
+        }
+
+        .nav-link:hover {
+            color: var(--primary-600);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .btn {
+            padding: var(--space-3) var(--space-6);
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--duration-normal) var(--ease-out);
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-700);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary-600);
+            border: 1px solid var(--primary-600);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-50);
+        }
+
+        .cart-btn {
+            position: relative;
+            background: none;
+            border: none;
+            padding: var(--space-2);
+            cursor: pointer;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--secondary-500);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+            color: white;
+            padding: var(--space-16) 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: var(--space-4);
+        }
+
+        @media (min-width: 768px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+        }
+
+        .hero p {
+            font-size: 1.125rem;
+            margin-bottom: var(--space-8);
+            opacity: 0.9;
+        }
+
+        /* Search Section */
+        .search-section {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-form {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: var(--space-2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            padding: var(--space-4);
+            font-size: 16px;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--gray-400);
+        }
+
+        .search-btn {
+            background: var(--secondary-500);
+            color: white;
+            border: none;
+            padding: var(--space-4) var(--space-6);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background var(--duration-normal) var(--ease-out);
+        }
+
+        .search-btn:hover {
+            background: var(--secondary-600);
+        }
+
+        /* Autocomplete */
+        .autocomplete {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-top: var(--space-2);
+            display: none;
+            z-index: 10;
+        }
+
+        .autocomplete.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--gray-200);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background: var(--gray-50);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: var(--space-12) 0;
+            text-align: center;
+        }
+
+        .cta-btn {
+            background: var(--secondary-500);
+            color: white;
+            padding: var(--space-5) var(--space-8);
+            font-size: 1.125rem;
+            border-radius: 12px;
+            margin-bottom: var(--space-6);
+        }
+
+        .cta-btn:hover {
+            background: var(--secondary-600);
+            transform: translateY(-2px);
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            gap: var(--space-6);
+            margin-top: var(--space-8);
+        }
+
+        @media (min-width: 768px) {
+            .features {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .feature {
+            text-align: center;
+            padding: var(--space-6);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-100);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-4);
+            font-size: 24px;
+            color: var(--primary-600);
+        }
+
+        .feature h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: var(--space-2);
+        }
+
+        .feature p {
+            color: var(--gray-600);
+        }
+
+        /* Popular Products */
+        .popular-section {
+            padding: var(--space-16) 0;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: var(--space-8);
+            color: var(--gray-900);
+        }
+
+        .products-grid {
+            display: grid;
+            gap: var(--space-6);
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all var(--duration-normal) var(--ease-out);
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .product-image {
+            height: 200px;
+            background: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: var(--gray-400);
+        }
+
+        .product-info {
+            padding: var(--space-5);
+        }
+
+        .product-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            margin-bottom: var(--space-2);
+        }
+
+        .badge-best {
+            background: var(--error-100);
+            color: var(--error-700);
+        }
+
+        .badge-value {
+            background: var(--success-100);
+            color: var(--success-700);
+        }
+
+        .product-name {
+            font-weight: 600;
+            margin-bottom: var(--space-2);
+        }
+
+        .product-price {
+            font-family: var(--font-mono);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-3);
+        }
+
+        .product-score {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .score-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--primary-700);
+            position: relative;
+        }
+
+        .score-circle::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--primary-500) 0deg,
+                var(--primary-500) calc(var(--score) * 3.6deg),
+                transparent calc(var(--score) * 3.6deg)
+            );
+            z-index: -1;
+        }
+
+        .score-preview {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gray-900);
+            color: white;
+            padding: var(--space-2) var(--space-3);
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--duration-normal) var(--ease-out);
+            z-index: 10;
+        }
+
+        .score-preview::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: var(--gray-900);
+        }
+
+        .score-display:hover .score-preview {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--gray-900);
+            color: var(--gray-300);
+            padding: var(--space-12) 0 var(--space-8);
+        }
+
+        .footer-content {
+            display: grid;
+            gap: var(--space-8);
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 768px) {
+            .footer-content {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .footer-section h4 {
+            color: white;
+            font-weight: 600;
+            margin-bottom: var(--space-4);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: var(--space-2);
+        }
+
+        .footer-links a {
+            color: var(--gray-300);
+            text-decoration: none;
+            transition: color var(--duration-normal) var(--ease-out);
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--gray-700);
+            padding-top: var(--space-6);
+            margin-top: var(--space-8);
+            text-align: center;
+        }
+
+        /* Mobile Navigation */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid var(--gray-200);
+            padding: var(--space-3) 0;
+            z-index: 100;
+        }
+
+        @media (max-width: 767px) {
+            .mobile-nav {
+                display: flex;
+            }
+
+            body {
+                padding-bottom: 80px;
+            }
+        }
+
+        .mobile-nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-1);
+            text-decoration: none;
+            color: var(--gray-600);
+            font-size: 12px;
+        }
+
+        .mobile-nav-item.active {
+            color: var(--primary-600);
+        }
+
+        .mobile-nav-icon {
+            font-size: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 767px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .search-form {
+                flex-direction: column;
+                gap: var(--space-2);
+            }
+
+            .search-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo">SmartChoice</a>
+
+                <nav class="nav">
+                    <a href="#" class="nav-link">상품검색</a>
+                    <a href="#" class="nav-link">개인화추천</a>
+                    <a href="#" class="nav-link">가성비분석</a>
+                    <a href="#" class="nav-link">고객센터</a>
+                </nav>
+
+                <div class="header-actions">
+                    <a href="07-로그인.html" class="btn btn-secondary">로그인</a>
+                    <a href="06-회원가입.html" class="btn btn-primary">회원가입</a>
+                    <button class="cart-btn" onclick="goToCart()">
+                        🛒
+                        <span class="cart-count">2</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>똑똑한 핸드폰 선택의 시작</h1>
+            <p>가성비 점수로 한눈에 비교하고, 나에게 맞는 최고의 핸드폰을 찾아보세요</p>
+
+            <div class="search-section">
+                <form class="search-form" onsubmit="performSearch(event)">
+                    <input
+                        type="text"
+                        class="search-input"
+                        placeholder="핸드폰 브랜드, 모델명으로 검색하세요"
+                        onfocus="showAutocomplete()"
+                        onblur="hideAutocomplete()"
+                        oninput="updateAutocomplete(this.value)"
+                    >
+                    <button type="submit" class="search-btn">검색</button>
+                </form>
+
+                <div class="autocomplete" id="autocomplete">
+                    <div class="autocomplete-item" onclick="selectItem('iPhone 15 Pro')">
+                        📱 iPhone 15 Pro
+                    </div>
+                    <div class="autocomplete-item" onclick="selectItem('Galaxy S24')">
+                        📱 Galaxy S24
+                    </div>
+                    <div class="autocomplete-item" onclick="selectItem('Galaxy Z Fold 5')">
+                        📱 Galaxy Z Fold 5
+                    </div>
+                    <div class="autocomplete-item" onclick="selectItem('Pixel 8 Pro')">
+                        📱 Pixel 8 Pro
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA & Features Section -->
+    <section class="cta-section">
+        <div class="container">
+            <a href="#" class="btn cta-btn" onclick="goToRecommendation()">
+                나만의 맞춤 추천받기 ✨
+            </a>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h3>정확한 가성비 점수</h3>
+                    <p>가격, 성능, 리뷰를 종합한 객관적인 점수로 똑똑한 선택을 도와드립니다</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>5초 내 즉시 분석</h3>
+                    <p>복잡한 사양 비교는 이제 그만. 클릭 한 번으로 가성비 점수를 확인하세요</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎨</div>
+                    <h3>개인화 추천</h3>
+                    <p>사용 패턴과 선호도를 분석하여 나만을 위한 맞춤형 핸드폰을 추천합니다</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Products Section -->
+    <section class="popular-section">
+        <div class="container">
+            <h2 class="section-title">가성비 인기 TOP 6</h2>
+
+            <div class="products-grid">
+                <div class="product-card" onclick="goToProduct('iphone-15-pro')">
+                    <div class="product-image">📱</div>
+                    <div class="product-info">
+                        <span class="product-badge badge-best">BEST</span>
+                        <h3 class="product-name">iPhone 15 Pro 128GB</h3>
+                        <div class="product-price">1,350,000원</div>
+                        <div class="product-score">
+                            <div class="score-display">
+                                <div class="score-circle" style="--score: 88">88</div>
+                                <span>가성비 우수</span>
+                                <div class="score-preview">
+                                    가격: 75점<br>
+                                    성능: 95점<br>
+                                    리뷰: 92점
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" onclick="goToProduct('galaxy-s24')">
+                    <div class="product-image">📱</div>
+                    <div class="product-info">
+                        <span class="product-badge badge-value">VALUE</span>
+                        <h3 class="product-name">Galaxy S24 256GB</h3>
+                        <div class="product-price">1,155,000원</div>
+                        <div class="product-score">
+                            <div class="score-display">
+                                <div class="score-circle" style="--score: 85">85</div>
+                                <span>가성비 우수</span>
+                                <div class="score-preview">
+                                    가격: 85점<br>
+                                    성능: 89점<br>
+                                    리뷰: 81점
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" onclick="goToProduct('pixel-8-pro')">
+                    <div class="product-image">📱</div>
+                    <div class="product-info">
+                        <h3 class="product-name">Pixel 8 Pro 128GB</h3>
+                        <div class="product-price">999,000원</div>
+                        <div class="product-score">
+                            <div class="score-display">
+                                <div class="score-circle" style="--score: 82">82</div>
+                                <span>가성비 우수</span>
+                                <div class="score-preview">
+                                    가격: 90점<br>
+                                    성능: 85점<br>
+                                    리뷰: 71점
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" onclick="goToProduct('galaxy-z-fold-5')">
+                    <div class="product-image">📱</div>
+                    <div class="product-info">
+                        <h3 class="product-name">Galaxy Z Fold 5 256GB</h3>
+                        <div class="product-price">2,098,000원</div>
+                        <div class="product-score">
+                            <div class="score-display">
+                                <div class="score-circle" style="--score: 78">78</div>
+                                <span>가성비 양호</span>
+                                <div class="score-preview">
+                                    가격: 65점<br>
+                                    성능: 95점<br>
+                                    리뷰: 75점
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" onclick="goToProduct('iphone-14')">
+                    <div class="product-image">📱</div>
+                    <div class="product-info">
+                        <span class="product-badge badge-value">VALUE</span>
+                        <h3 class="product-name">iPhone 14 128GB</h3>
+                        <div class="product-price">1,105,000원</div>
+                        <div class="product-score">
+                            <div class="score-display">
+                                <div class="score-circle" style="--score: 80">80</div>
+                                <span>가성비 양호</span>
+                                <div class="score-preview">
+                                    가격: 80점<br>
+                                    성능: 85점<br>
+                                    리뷰: 75점
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card" onclick="goToProduct('galaxy-a54')">
+                    <div class="product-image">📱</div>
+                    <div class="product-info">
+                        <span class="product-badge badge-value">VALUE</span>
+                        <h3 class="product-name">Galaxy A54 5G 128GB</h3>
+                        <div class="product-price">449,000원</div>
+                        <div class="product-score">
+                            <div class="score-display">
+                                <div class="score-circle" style="--score: 75">75</div>
+                                <span>가성비 양호</span>
+                                <div class="score-preview">
+                                    가격: 95점<br>
+                                    성능: 70점<br>
+                                    리뷰: 60점
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>SmartChoice</h4>
+                    <p>똑똑한 핸드폰 선택의 시작</p>
+                </div>
+                <div class="footer-section">
+                    <h4>서비스</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">상품검색</a></li>
+                        <li><a href="#">개인화추천</a></li>
+                        <li><a href="#">가성비분석</a></li>
+                        <li><a href="#">가격비교</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>고객지원</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">고객센터</a></li>
+                        <li><a href="#">자주묻는질문</a></li>
+                        <li><a href="12-피드백.html">피드백</a></li>
+                        <li><a href="#">배송안내</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>정보</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">회사소개</a></li>
+                        <li><a href="#">이용약관</a></li>
+                        <li><a href="#">개인정보처리방침</a></li>
+                        <li><a href="#">사업자정보</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 SmartChoice. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <a href="#" class="mobile-nav-item active">
+            <div class="mobile-nav-icon">🏠</div>
+            <span>홈</span>
+        </a>
+        <a href="#" class="mobile-nav-item" onclick="performSearch()">
+            <div class="mobile-nav-icon">🔍</div>
+            <span>검색</span>
+        </a>
+        <a href="#" class="mobile-nav-item" onclick="goToRecommendation()">
+            <div class="mobile-nav-icon">✨</div>
+            <span>추천</span>
+        </a>
+        <a href="#" class="mobile-nav-item" onclick="goToCart()">
+            <div class="mobile-nav-icon">🛒</div>
+            <span>장바구니</span>
+        </a>
+        <a href="#" class="mobile-nav-item" onclick="goToMyPage()">
+            <div class="mobile-nav-icon">👤</div>
+            <span>마이페이지</span>
+        </a>
+    </nav>
+
+    <script>
+        // 자동완성 기능
+        function showAutocomplete() {
+            document.getElementById('autocomplete').classList.add('show');
+        }
+
+        function hideAutocomplete() {
+            setTimeout(() => {
+                document.getElementById('autocomplete').classList.remove('show');
+            }, 200);
+        }
+
+        function updateAutocomplete(value) {
+            // 실제 구현시에는 API 호출로 검색 결과를 가져와야 함
+            console.log('검색어:', value);
+        }
+
+        function selectItem(item) {
+            document.querySelector('.search-input').value = item;
+            hideAutocomplete();
+            performSearch();
+        }
+
+        // 검색 기능
+        function performSearch(event) {
+            if (event) event.preventDefault();
+
+            const searchValue = document.querySelector('.search-input').value;
+            if (searchValue.trim()) {
+                alert(`"${searchValue}" 검색 결과 페이지로 이동합니다`);
+                // 실제 구현시: window.location.href = `02-검색결과.html?q=${encodeURIComponent(searchValue)}`;
+            }
+        }
+
+        // 네비게이션 함수들
+        function goToProduct(productId) {
+            alert(`${productId} 상품 상세 페이지로 이동합니다`);
+            // 실제 구현시: window.location.href = `03-상품상세.html?id=${productId}`;
+        }
+
+        function goToRecommendation() {
+            // 로그인 체크
+            if (!isLoggedIn()) {
+                if (confirm('개인화 추천을 받으려면 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+                    window.location.href = '07-로그인.html';
+                }
+                return;
+            }
+
+            alert('개인화 추천 페이지로 이동합니다');
+            // 실제 구현시: window.location.href = '05-개인화추천.html';
+        }
+
+        function goToCart() {
+            alert('장바구니 페이지로 이동합니다');
+            // 실제 구현시: window.location.href = '09-장바구니.html';
+        }
+
+        function goToMyPage() {
+            if (!isLoggedIn()) {
+                if (confirm('마이페이지를 이용하려면 로그인이 필요합니다. 로그인 페이지로 이동하시겠습니까?')) {
+                    window.location.href = '07-로그인.html';
+                }
+                return;
+            }
+
+            alert('마이페이지로 이동합니다');
+            // 실제 구현시: window.location.href = '08-마이페이지.html';
+        }
+
+        function isLoggedIn() {
+            // 실제 구현시에는 세션 또는 토큰 체크
+            return false;
+        }
+
+        // 상품 카드 호버 효과
+        document.addEventListener('DOMContentLoaded', function() {
+            const productCards = document.querySelectorAll('.product-card');
+
+            productCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    // 가성비 점수 미리보기 효과
+                    const scoreDisplay = this.querySelector('.score-display');
+                    if (scoreDisplay) {
+                        scoreDisplay.style.transform = 'scale(1.05)';
+                    }
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    const scoreDisplay = this.querySelector('.score-display');
+                    if (scoreDisplay) {
+                        scoreDisplay.style.transform = 'scale(1)';
+                    }
+                });
+            });
+        });
+
+        // 스크롤 효과
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+            } else {
+                header.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+            }
+        });
+
+        // 모바일 터치 효과
+        if ('ontouchstart' in window) {
+            document.addEventListener('touchstart', function() {}, true);
+        }
+    </script>
+</body>
+</html>
