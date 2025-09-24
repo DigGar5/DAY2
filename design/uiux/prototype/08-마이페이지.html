@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 - PhoneMart</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        .mypage-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+            position: sticky;
+            top: 90px;
+        }
+
+        .profile-section {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ecf0f1;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 15px;
+        }
+
+        .profile-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .profile-email {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            color: #34495e;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: #e8f4f8;
+            color: #2980b9;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .content-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .content-subtitle {
+            color: #7f8c8d;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* 개인화 설정 스타일 */
+        .personalization-settings {
+            margin-bottom: 30px;
+        }
+
+        .weight-settings {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .weight-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .weight-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .weight-control {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .weight-control.focused {
+            border-color: #3498db;
+        }
+
+        .weight-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .weight-slider {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .weight-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .weight-total {
+            text-align: center;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #2980b9;
+        }
+
+        .preview-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+        }
+
+        .preview-title {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .score-preview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .score-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .score-before,
+        .score-after {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .score-before {
+            color: #95a5a6;
+        }
+
+        .score-after {
+            color: #27ae60;
+        }
+
+        .score-change {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .score-change.positive {
+            color: #27ae60;
+        }
+
+        .score-change.negative {
+            color: #e74c3c;
+        }
+
+        .save-section {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-save:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 계정 관리 스타일 */
+        .account-form {
+            max-width: 600px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn-update {
+            background: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-update:hover {
+            background: #2980b9;
+        }
+
+        /* 주문 내역 스타일 */
+        .order-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #ecf0f1;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #34495e;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            border-color: #3498db;
+            background: #e8f4f8;
+            color: #2980b9;
+        }
+
+        .order-list {
+            space-y: 20px;
+        }
+
+        .order-card {
+            border: 2px solid #ecf0f1;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .order-card:hover {
+            border-color: #3498db;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .order-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .order-number {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .order-date {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .order-status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-completed { background: #d5edda; color: #155724; }
+        .status-shipping { background: #cce5ff; color: #004085; }
+        .status-preparing { background: #fff3cd; color: #856404; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+
+        .order-products {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .product-image-small {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .product-details {
+            flex: 1;
+        }
+
+        .product-name-small {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .product-price-small {
+            color: #e74c3c;
+            font-weight: 500;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-action {
+            padding: 8px 15px;
+            border: 2px solid #ecf0f1;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-action:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-action.primary {
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        .btn-action.primary:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        /* 설정 이력 스타일 */
+        .history-list {
+            space-y: 15px;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+
+        .history-date {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .history-change {
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+
+        .change-detail {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .mypage-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 15px;
+            }
+
+            .sidebar {
+                position: static;
+            }
+
+            .nav-menu {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+            }
+
+            .weight-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .score-preview {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .order-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .btn-action {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="01-메인대시보드.html">📱 PhoneMart</a>
+            </div>
+            <nav class="nav">
+                <a href="02-검색결과.html">검색</a>
+                <a href="05-개인화추천.html">추천</a>
+                <a href="09-장바구니.html">장바구니</a>
+                <a href="08-마이페이지.html" class="active">마이페이지</a>
+            </nav>
+            <div class="header-actions">
+                <div class="user-menu">
+                    <span>홍길동님</span>
+                    <a href="#" class="btn-logout">로그아웃</a>
+                </div>
+                <div class="cart-icon">
+                    <span class="cart-count">2</span>
+                    🛒
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="mypage-container">
+        <aside class="sidebar">
+            <div class="profile-section">
+                <div class="profile-avatar">홍</div>
+                <div class="profile-name">홍길동</div>
+                <div class="profile-email">hong@example.com</div>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-section="personalization">
+                        ⚙️ 개인화 설정
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="account">
+                        👤 계정 관리
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="orders">
+                        📦 주문 내역
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="history">
+                        📊 설정 이력
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <div class="main-content">
+            <!-- 개인화 설정 섹션 -->
+            <div id="personalization" class="section active">
+                <div class="content-header">
+                    <h1 class="content-title">개인화 설정</h1>
+                    <p class="content-subtitle">가성비 계산 기준을 개인 취향에 맞게 조정하세요</p>
+                </div>
+
+                <div class="personalization-settings">
+                    <div class="weight-settings">
+                        <h3 class="weight-title">🎯 가성비 계산 가중치 설정</h3>
+                        <div class="weight-controls">
+                            <div class="weight-control" data-type="price">
+                                <div class="weight-label">💰 가격 (저렴할수록 좋음)</div>
+                                <input type="range" class="weight-slider" id="priceWeight"
+                                       min="0" max="100" value="40">
+                                <div class="weight-value">40%</div>
+                            </div>
+                            <div class="weight-control" data-type="performance">
+                                <div class="weight-label">🚀 성능 (높을수록 좋음)</div>
+                                <input type="range" class="weight-slider" id="performanceWeight"
+                                       min="0" max="100" value="35">
+                                <div class="weight-value">35%</div>
+                            </div>
+                            <div class="weight-control" data-type="review">
+                                <div class="weight-label">⭐ 리뷰 (평점이 높을수록 좋음)</div>
+                                <input type="range" class="weight-slider" id="reviewWeight"
+                                       min="0" max="100" value="25">
+                                <div class="weight-value">25%</div>
+                            </div>
+                        </div>
+                        <div class="weight-total">
+                            총 가중치: <span id="totalWeight">100%</span>
+                        </div>
+                    </div>
+
+                    <div class="preview-section">
+                        <h3 class="preview-title">📊 변경사항 미리보기</h3>
+                        <div class="score-preview">
+                            <div class="score-card">
+                                <div class="score-before">87점</div>
+                                <div>이전 점수</div>
+                                <div style="color: #7f8c8d; font-size: 0.9rem;">
+                                    갤럭시 S24 Ultra
+                                </div>
+                            </div>
+                            <div class="score-card">
+                                <div class="score-after" id="previewScore">89점</div>
+                                <div>변경 후 점수</div>
+                                <div class="score-change positive" id="scoreChange">+2점</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="save-section">
+                        <button class="btn-save" id="saveSettings">변경사항 저장</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 계정 관리 섹션 -->
+            <div id="account" class="section">
+                <div class="content-header">
+                    <h1 class="content-title">계정 관리</h1>
+                    <p class="content-subtitle">개인 정보를 수정하고 계정 설정을 관리하세요</p>
+                </div>
+
+                <form class="account-form">
+                    <div class="form-group">
+                        <label class="form-label">이메일 주소</label>
+                        <input type="email" class="form-input" value="hong@example.com" readonly>
+                        <small style="color: #7f8c8d;">이메일은 변경할 수 없습니다</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">이름</label>
+                            <input type="text" class="form-input" value="홍길동">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">닉네임</label>
+                            <input type="text" class="form-input" value="길동이">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">휴대폰 번호</label>
+                            <input type="tel" class="form-input" value="010-1234-5678">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">생년월일</label>
+                            <input type="date" class="form-input" value="1990-01-01">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">주소</label>
+                        <input type="text" class="form-input" value="서울특별시 강남구 테헤란로 123" placeholder="주소를 입력하세요">
+                    </div>
+
+                    <div class="form-group">
+                        <button type="button" class="btn-update">정보 수정</button>
+                    </div>
+                </form>
+
+                <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ecf0f1;">
+                    <h3 style="color: #e74c3c; margin-bottom: 15px;">⚠️ 계정 삭제</h3>
+                    <p style="color: #7f8c8d; margin-bottom: 15px;">
+                        계정을 삭제하면 모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다.
+                    </p>
+                    <button type="button" style="background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;">
+                        계정 삭제
+                    </button>
+                </div>
+            </div>
+
+            <!-- 주문 내역 섹션 -->
+            <div id="orders" class="section">
+                <div class="content-header">
+                    <h1 class="content-title">주문 내역</h1>
+                    <p class="content-subtitle">구매 이력을 확인하고 배송 상태를 추적하세요</p>
+                </div>
+
+                <div class="order-filters">
+                    <button class="filter-btn active" data-status="all">전체</button>
+                    <button class="filter-btn" data-status="preparing">주문완료</button>
+                    <button class="filter-btn" data-status="shipping">배송중</button>
+                    <button class="filter-btn" data-status="completed">배송완료</button>
+                    <button class="filter-btn" data-status="cancelled">취소/반품</button>
+                </div>
+
+                <div class="order-list">
+                    <div class="order-card" data-status="completed">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <div class="order-number">주문번호: 20241201-001</div>
+                                <div class="order-date">2024.12.01 주문</div>
+                            </div>
+                            <div class="order-status status-completed">배송완료</div>
+                        </div>
+                        <div class="order-products">
+                            <img src="https://via.placeholder.com/60x60/4a90e2/white?text=iPhone"
+                                 alt="iPhone 15 Pro" class="product-image-small">
+                            <div class="product-details">
+                                <div class="product-name-small">iPhone 15 Pro 128GB</div>
+                                <div class="product-price-small">1,350,000원</div>
+                            </div>
+                        </div>
+                        <div class="order-actions">
+                            <button class="btn-action">배송 추적</button>
+                            <button class="btn-action primary">리뷰 작성</button>
+                            <button class="btn-action">재주문</button>
+                        </div>
+                    </div>
+
+                    <div class="order-card" data-status="shipping">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <div class="order-number">주문번호: 20241215-002</div>
+                                <div class="order-date">2024.12.15 주문</div>
+                            </div>
+                            <div class="order-status status-shipping">배송중</div>
+                        </div>
+                        <div class="order-products">
+                            <img src="https://via.placeholder.com/60x60/1abc9c/white?text=Galaxy"
+                                 alt="Galaxy S24" class="product-image-small">
+                            <div class="product-details">
+                                <div class="product-name-small">갤럭시 S24 Ultra 256GB</div>
+                                <div class="product-price-small">1,590,000원</div>
+                            </div>
+                        </div>
+                        <div class="order-actions">
+                            <button class="btn-action primary">배송 추적</button>
+                            <button class="btn-action">주문 취소</button>
+                        </div>
+                    </div>
+
+                    <div class="order-card" data-status="preparing">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <div class="order-number">주문번호: 20241220-003</div>
+                                <div class="order-date">2024.12.20 주문</div>
+                            </div>
+                            <div class="order-status status-preparing">주문완료</div>
+                        </div>
+                        <div class="order-products">
+                            <img src="https://via.placeholder.com/60x60/f39c12/white?text=Galaxy"
+                                 alt="Galaxy A55" class="product-image-small">
+                            <div class="product-details">
+                                <div class="product-name-small">갤럭시 A55 128GB</div>
+                                <div class="product-price-small">549,000원</div>
+                            </div>
+                        </div>
+                        <div class="order-actions">
+                            <button class="btn-action">주문 상세</button>
+                            <button class="btn-action">주문 취소</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 설정 이력 섹션 -->
+            <div id="history" class="section">
+                <div class="content-header">
+                    <h1 class="content-title">설정 이력</h1>
+                    <p class="content-subtitle">가중치 변경 기록을 확인하세요</p>
+                </div>
+
+                <div class="history-list">
+                    <div class="history-item">
+                        <div class="history-date">2024.12.20 14:30</div>
+                        <div class="history-change">
+                            가중치 설정을 변경했습니다.
+                            <div class="change-detail">
+                                가격: 45% → 40% (-5%)<br>
+                                성능: 30% → 35% (+5%)<br>
+                                리뷰: 25% → 25% (변경없음)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-item">
+                        <div class="history-date">2024.12.15 09:15</div>
+                        <div class="history-change">
+                            가중치 설정을 변경했습니다.
+                            <div class="change-detail">
+                                가격: 50% → 45% (-5%)<br>
+                                성능: 30% → 30% (변경없음)<br>
+                                리뷰: 20% → 25% (+5%)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="history-item">
+                        <div class="history-date">2024.12.10 16:45</div>
+                        <div class="history-change">
+                            계정이 생성되었습니다.
+                            <div class="change-detail">
+                                기본 가중치 설정: 가격 50%, 성능 30%, 리뷰 20%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>PhoneMart</h3>
+                    <p>가성비 좋은 핸드폰을 찾는 가장 똑똑한 방법</p>
+                </div>
+                <div class="footer-section">
+                    <h4>고객센터</h4>
+                    <p>1588-1234</p>
+                    <p>평일 09:00-18:00</p>
+                </div>
+                <div class="footer-section">
+                    <h4>정보</h4>
+                    <a href="#">이용약관</a>
+                    <a href="#">개인정보처리방침</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="common.js"></script>
+    <script>
+        // DOM 요소들
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.section');
+        const weightSliders = document.querySelectorAll('.weight-slider');
+        const totalWeightDisplay = document.getElementById('totalWeight');
+        const previewScore = document.getElementById('previewScore');
+        const scoreChange = document.getElementById('scoreChange');
+        const saveButton = document.getElementById('saveSettings');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const orderCards = document.querySelectorAll('.order-card');
+
+        let originalWeights = { price: 40, performance: 35, review: 25 };
+        let hasChanges = false;
+
+        // 네비게이션 이벤트
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // 활성 상태 변경
+                navLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+
+                // 섹션 전환
+                const sectionId = this.dataset.section;
+                sections.forEach(s => s.classList.remove('active'));
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+
+        // 가중치 슬라이더 이벤트
+        weightSliders.forEach(slider => {
+            slider.addEventListener('input', updateWeights);
+        });
+
+        function updateWeights() {
+            const priceWeight = parseInt(document.getElementById('priceWeight').value);
+            const performanceWeight = parseInt(document.getElementById('performanceWeight').value);
+            const reviewWeight = parseInt(document.getElementById('reviewWeight').value);
+
+            const total = priceWeight + performanceWeight + reviewWeight;
+
+            // 가중치 값 표시 업데이트
+            document.querySelector('[data-type="price"] .weight-value').textContent = priceWeight + '%';
+            document.querySelector('[data-type="performance"] .weight-value').textContent = performanceWeight + '%';
+            document.querySelector('[data-type="review"] .weight-value').textContent = reviewWeight + '%';
+
+            // 총 가중치 표시
+            totalWeightDisplay.textContent = total + '%';
+            totalWeightDisplay.style.color = total === 100 ? '#27ae60' : '#e74c3c';
+
+            // 100%가 아닌 경우 조정
+            if (total !== 100) {
+                const diff = 100 - total;
+                const adjustment = Math.round(diff / 3);
+
+                // 각 슬라이더에 조정값 적용
+                setTimeout(() => {
+                    if (total !== 100) {
+                        autoAdjustWeights(priceWeight, performanceWeight, reviewWeight);
+                    }
+                }, 500);
+            }
+
+            // 미리보기 업데이트
+            updatePreview(priceWeight, performanceWeight, reviewWeight);
+
+            // 변경사항 확인
+            checkForChanges(priceWeight, performanceWeight, reviewWeight);
+        }
+
+        function autoAdjustWeights(price, performance, review) {
+            const total = price + performance + review;
+            if (total === 100) return;
+
+            const diff = 100 - total;
+            const newPrice = Math.max(0, Math.min(100, price + Math.round(diff / 3)));
+            const newPerformance = Math.max(0, Math.min(100, performance + Math.round(diff / 3)));
+            const newReview = Math.max(0, Math.min(100, 100 - newPrice - newPerformance));
+
+            document.getElementById('priceWeight').value = newPrice;
+            document.getElementById('performanceWeight').value = newPerformance;
+            document.getElementById('reviewWeight').value = newReview;
+
+            updateWeights();
+        }
+
+        function updatePreview(price, performance, review) {
+            // 샘플 상품 데이터 (갤럭시 S24 Ultra)
+            const sampleProduct = {
+                priceScore: 70,    // 가격 점수 (비싼 편)
+                performanceScore: 95,  // 성능 점수 (매우 높음)
+                reviewScore: 88    // 리뷰 점수 (좋음)
+            };
+
+            // 새로운 점수 계산
+            const newScore = Math.round(
+                (sampleProduct.priceScore * price / 100) +
+                (sampleProduct.performanceScore * performance / 100) +
+                (sampleProduct.reviewScore * review / 100)
+            );
+
+            // 원래 점수 (40:35:25 비율)
+            const originalScore = Math.round(
+                (sampleProduct.priceScore * 40 / 100) +
+                (sampleProduct.performanceScore * 35 / 100) +
+                (sampleProduct.reviewScore * 25 / 100)
+            );
+
+            previewScore.textContent = newScore + '점';
+
+            const change = newScore - originalScore;
+            const changeElement = scoreChange;
+
+            if (change > 0) {
+                changeElement.textContent = '+' + change + '점';
+                changeElement.className = 'score-change positive';
+            } else if (change < 0) {
+                changeElement.textContent = change + '점';
+                changeElement.className = 'score-change negative';
+            } else {
+                changeElement.textContent = '변경없음';
+                changeElement.className = 'score-change';
+                changeElement.style.color = '#7f8c8d';
+            }
+        }
+
+        function checkForChanges(price, performance, review) {
+            hasChanges = price !== originalWeights.price ||
+                        performance !== originalWeights.performance ||
+                        review !== originalWeights.review;
+
+            saveButton.disabled = !hasChanges;
+
+            // 변경된 컨트롤 하이라이트
+            document.querySelectorAll('.weight-control').forEach(control => {
+                control.classList.remove('focused');
+            });
+
+            if (price !== originalWeights.price) {
+                document.querySelector('[data-type="price"]').classList.add('focused');
+            }
+            if (performance !== originalWeights.performance) {
+                document.querySelector('[data-type="performance"]').classList.add('focused');
+            }
+            if (review !== originalWeights.review) {
+                document.querySelector('[data-type="review"]').classList.add('focused');
+            }
+        }
+
+        // 설정 저장 이벤트
+        saveButton.addEventListener('click', function() {
+            if (!hasChanges) return;
+
+            const priceWeight = parseInt(document.getElementById('priceWeight').value);
+            const performanceWeight = parseInt(document.getElementById('performanceWeight').value);
+            const reviewWeight = parseInt(document.getElementById('reviewWeight').value);
+
+            // 저장 로직 (API 호출 시뮬레이션)
+            this.textContent = '저장 중...';
+            this.disabled = true;
+
+            setTimeout(() => {
+                // 원본 가중치 업데이트
+                originalWeights = {
+                    price: priceWeight,
+                    performance: performanceWeight,
+                    review: reviewWeight
+                };
+
+                hasChanges = false;
+                this.textContent = '저장 완료!';
+                this.style.background = '#27ae60';
+
+                // 하이라이트 제거
+                document.querySelectorAll('.weight-control').forEach(control => {
+                    control.classList.remove('focused');
+                });
+
+                // 설정 이력에 추가 (실제로는 페이지 새로고침 없이 동적 추가)
+                addHistoryItem(priceWeight, performanceWeight, reviewWeight);
+
+                setTimeout(() => {
+                    this.textContent = '변경사항 저장';
+                    this.style.background = 'linear-gradient(135deg, #27ae60, #229954)';
+                    this.disabled = false;
+                }, 2000);
+            }, 1000);
+        });
+
+        // 이력 추가 함수
+        function addHistoryItem(price, performance, review) {
+            const historyList = document.querySelector('.history-list');
+            const now = new Date();
+            const dateStr = now.getFullYear() + '.' +
+                           String(now.getMonth() + 1).padStart(2, '0') + '.' +
+                           String(now.getDate()).padStart(2, '0') + ' ' +
+                           String(now.getHours()).padStart(2, '0') + ':' +
+                           String(now.getMinutes()).padStart(2, '0');
+
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.innerHTML = `
+                <div class="history-date">${dateStr}</div>
+                <div class="history-change">
+                    가중치 설정을 변경했습니다.
+                    <div class="change-detail">
+                        가격: ${originalWeights.price}% → ${price}% (${price - originalWeights.price >= 0 ? '+' : ''}${price - originalWeights.price}%)<br>
+                        성능: ${originalWeights.performance}% → ${performance}% (${performance - originalWeights.performance >= 0 ? '+' : ''}${performance - originalWeights.performance}%)<br>
+                        리뷰: ${originalWeights.review}% → ${review}% (${review - originalWeights.review >= 0 ? '+' : ''}${review - originalWeights.review}%)
+                    </div>
+                </div>
+            `;
+
+            historyList.insertBefore(historyItem, historyList.firstChild);
+        }
+
+        // 주문 필터 이벤트
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // 활성 상태 변경
+                filterBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                const status = this.dataset.status;
+
+                // 주문 카드 필터링
+                orderCards.forEach(card => {
+                    if (status === 'all') {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = card.dataset.status === status ? 'block' : 'none';
+                    }
+                });
+            });
+        });
+
+        // 주문 액션 버튼 이벤트
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn-action')) {
+                const action = e.target.textContent.trim();
+
+                switch (action) {
+                    case '배송 추적':
+                        showNotification('배송 추적 페이지로 이동합니다');
+                        break;
+                    case '리뷰 작성':
+                        showNotification('리뷰 작성 페이지로 이동합니다');
+                        break;
+                    case '재주문':
+                        showNotification('상품을 장바구니에 담았습니다');
+                        break;
+                    case '주문 취소':
+                        if (confirm('정말로 주문을 취소하시겠습니까?')) {
+                            showNotification('주문이 취소되었습니다');
+                        }
+                        break;
+                    case '주문 상세':
+                        showNotification('주문 상세 정보를 표시합니다');
+                        break;
+                }
+            }
+        });
+
+        // 알림 메시지 표시 함수
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #3498db;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notification.textContent = message;
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+                style.remove();
+            }, 3000);
+        }
+
+        // 페이지 로드 시 초기 설정
+        document.addEventListener('DOMContentLoaded', function() {
+            updateWeights();
+        });
+    </script>
+</body>
+</html>

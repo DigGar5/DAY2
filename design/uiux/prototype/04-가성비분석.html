@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy S24 Ultra 가성비 분석 - SmartPhone Store</title>
+    <link rel="stylesheet" href="common.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .breadcrumb {
+            padding: var(--space-4) 0;
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+        }
+
+        .breadcrumb a {
+            color: var(--gray-600);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-600);
+        }
+
+        .analysis-header {
+            background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+            color: white;
+            padding: var(--space-8);
+            border-radius: 12px;
+            margin-bottom: var(--space-8);
+            text-align: center;
+        }
+
+        .analysis-title {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            margin-bottom: var(--space-2);
+        }
+
+        .analysis-subtitle {
+            font-size: var(--text-lg);
+            opacity: 0.9;
+            margin-bottom: var(--space-6);
+        }
+
+        .main-score-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-8);
+        }
+
+        .score-circle-huge {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .score-circle-huge::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ffffff 0deg,
+                #ffffff calc(var(--score, 0) * 3.6deg),
+                rgba(255, 255, 255, 0.2) calc(var(--score, 0) * 3.6deg)
+            );
+        }
+
+        .score-content-huge {
+            position: relative;
+            z-index: 1;
+            background: white;
+            border-radius: 50%;
+            width: 160px;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-700);
+        }
+
+        .score-number-huge {
+            font-family: var(--font-mono);
+            font-size: 48px;
+            font-weight: var(--font-bold);
+            line-height: 1;
+        }
+
+        .score-grade-huge {
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            margin-top: var(--space-2);
+        }
+
+        .score-summary {
+            text-align: left;
+        }
+
+        .score-summary h3 {
+            font-size: var(--text-xl);
+            margin-bottom: var(--space-4);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-3);
+            padding: var(--space-2) 0;
+        }
+
+        .summary-label {
+            font-size: var(--text-base);
+        }
+
+        .summary-value {
+            font-family: var(--font-mono);
+            font-size: var(--text-lg);
+            font-weight: var(--font-bold);
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
+        }
+
+        .analysis-card {
+            background: white;
+            border-radius: 12px;
+            padding: var(--space-6);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: var(--text-xl);
+            font-weight: var(--font-semibold);
+            color: var(--gray-900);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .card-icon {
+            font-size: var(--text-2xl);
+        }
+
+        /* 차트 컨테이너 */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: var(--space-4);
+        }
+
+        .chart-container.pie-chart {
+            height: 250px;
+        }
+
+        /* 점수 분해 섹션 */
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+
+        .breakdown-item {
+            text-align: center;
+            padding: var(--space-4);
+            background: var(--gray-50);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-600);
+        }
+
+        .breakdown-score {
+            font-family: var(--font-mono);
+            font-size: var(--text-2xl);
+            font-weight: var(--font-bold);
+            color: var(--primary-600);
+            line-height: 1;
+        }
+
+        .breakdown-label {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+            margin-top: var(--space-1);
+        }
+
+        .breakdown-weight {
+            font-size: var(--text-xs);
+            color: var(--gray-500);
+            margin-top: var(--space-1);
+        }
+
+        /* 비교 테이블 */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: var(--space-4);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: var(--space-3);
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .comparison-table th {
+            background: var(--gray-50);
+            font-weight: var(--font-semibold);
+            color: var(--gray-900);
+        }
+
+        .comparison-table td {
+            font-size: var(--text-sm);
+        }
+
+        .product-name-cell {
+            font-weight: var(--font-medium);
+            color: var(--gray-900);
+        }
+
+        .current-product {
+            background: var(--primary-50);
+        }
+
+        .score-cell {
+            font-family: var(--font-mono);
+            font-weight: var(--font-bold);
+        }
+
+        .score-excellent { color: var(--success-600); }
+        .score-good { color: var(--primary-600); }
+        .score-average { color: var(--warning-600); }
+        .score-poor { color: var(--error-600); }
+
+        /* 계산 근거 섹션 */
+        .methodology-section {
+            background: var(--gray-50);
+            padding: var(--space-6);
+            border-radius: 8px;
+            margin-bottom: var(--space-4);
+        }
+
+        .methodology-title {
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            color: var(--gray-900);
+            margin-bottom: var(--space-3);
+        }
+
+        .methodology-item {
+            margin-bottom: var(--space-3);
+        }
+
+        .methodology-item h4 {
+            font-size: var(--text-base);
+            font-weight: var(--font-medium);
+            color: var(--gray-800);
+            margin-bottom: var(--space-1);
+        }
+
+        .methodology-item p {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+            line-height: var(--leading-relaxed);
+        }
+
+        /* 데이터 출처 */
+        .data-sources {
+            background: var(--info-50);
+            border: 1px solid var(--info-200);
+            padding: var(--space-4);
+            border-radius: 8px;
+            margin-top: var(--space-4);
+        }
+
+        .sources-title {
+            font-size: var(--text-base);
+            font-weight: var(--font-semibold);
+            color: var(--info-700);
+            margin-bottom: var(--space-2);
+        }
+
+        .sources-list {
+            font-size: var(--text-sm);
+            color: var(--info-600);
+            list-style: none;
+            padding: 0;
+        }
+
+        .sources-list li {
+            margin-bottom: var(--space-1);
+            padding-left: var(--space-4);
+            position: relative;
+        }
+
+        .sources-list li::before {
+            content: "📊";
+            position: absolute;
+            left: 0;
+        }
+
+        /* 기간 선택 */
+        .period-selector {
+            display: flex;
+            gap: var(--space-2);
+            margin-bottom: var(--space-4);
+        }
+
+        .period-btn {
+            padding: var(--space-2) var(--space-4);
+            border: 1px solid var(--gray-300);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: var(--text-sm);
+            transition: all var(--duration-normal) var(--ease-out);
+        }
+
+        .period-btn.active {
+            background: var(--primary-600);
+            color: white;
+            border-color: var(--primary-600);
+        }
+
+        .period-btn:hover:not(.active) {
+            border-color: var(--primary-500);
+        }
+
+        /* 액션 버튼들 */
+        .analysis-actions {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-4);
+            margin: var(--space-8) 0;
+        }
+
+        .btn-recalculate {
+            background: var(--primary-600);
+            color: white;
+            border: none;
+            padding: var(--space-3) var(--space-6);
+            border-radius: 8px;
+            font-size: var(--text-base);
+            font-weight: var(--font-medium);
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-out);
+        }
+
+        .btn-recalculate:hover {
+            background: var(--primary-700);
+        }
+
+        .btn-customize {
+            background: white;
+            color: var(--primary-600);
+            border: 1px solid var(--primary-600);
+            padding: var(--space-3) var(--space-6);
+            border-radius: 8px;
+            font-size: var(--text-base);
+            font-weight: var(--font-medium);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all var(--duration-normal) var(--ease-out);
+        }
+
+        .btn-customize:hover {
+            background: var(--primary-50);
+        }
+
+        /* 반응형 */
+        @media (max-width: 1023px) {
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-score-display {
+                flex-direction: column;
+                gap: var(--space-4);
+            }
+
+            .score-circle-huge {
+                width: 150px;
+                height: 150px;
+            }
+
+            .score-content-huge {
+                width: 120px;
+                height: 120px;
+            }
+
+            .score-number-huge {
+                font-size: 36px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .analysis-header {
+                padding: var(--space-6) var(--space-4);
+            }
+
+            .analysis-title {
+                font-size: var(--text-2xl);
+            }
+
+            .breakdown-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-table {
+                font-size: var(--text-xs);
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: var(--space-2);
+            }
+
+            .analysis-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="01-메인대시보드.html" class="logo">📱 SmartPhone Store</a>
+                <nav class="nav-menu">
+                    <a href="02-검색결과.html">상품검색</a>
+                    <a href="05-개인화추천.html">맞춤추천</a>
+                    <a href="08-마이페이지.html">마이페이지</a>
+                </nav>
+                <div class="header-actions">
+                    <a href="07-로그인.html" class="btn btn-outline btn-sm">로그인</a>
+                    <a href="09-장바구니.html" class="btn btn-primary btn-sm">
+                        장바구니 <span class="cart-count" style="display: none;">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="01-메인대시보드.html">홈</a> >
+            <a href="02-검색결과.html">검색결과</a> >
+            <a href="03-상품상세.html?id=1">Galaxy S24 Ultra</a> >
+            <span>가성비 분석</span>
+        </nav>
+
+        <div class="analysis-header">
+            <h1 class="analysis-title">🎯 AI 가성비 분석 리포트</h1>
+            <p class="analysis-subtitle" id="productSubtitle">Galaxy S24 Ultra의 상세 가성비 분석 결과를 확인하세요</p>
+            <div class="main-score-display">
+                <div class="score-circle-huge" style="--score: 92" id="mainScoreCircle">
+                    <div class="score-content-huge">
+                        <span class="score-number-huge" id="mainScoreNumber">92</span>
+                        <span class="score-grade-huge" id="mainScoreGrade">우수</span>
+                    </div>
+                </div>
+                <div class="score-summary">
+                    <h3>종합 평가</h3>
+                    <div class="summary-item">
+                        <span class="summary-label">📊 전체 순위</span>
+                        <span class="summary-value" id="overallRank">상위 8%</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">🏆 동급 대비</span>
+                        <span class="summary-value" id="categoryRank">1위</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">💡 추천도</span>
+                        <span class="summary-value" id="recommendationScore">95%</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">📅 분석일시</span>
+                        <span class="summary-value" id="analysisDate">2024.01.24</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="analysis-grid">
+            <!-- 점수 분해도 -->
+            <div class="analysis-card">
+                <h2 class="card-title">
+                    <span class="card-icon">🔍</span>
+                    점수 분해 분석
+                </h2>
+                <div class="breakdown-grid">
+                    <div class="breakdown-item">
+                        <div class="breakdown-score" id="priceScore">88</div>
+                        <div class="breakdown-label">가격 점수</div>
+                        <div class="breakdown-weight">가중치 40%</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-score" id="performanceScore">95</div>
+                        <div class="breakdown-label">성능 점수</div>
+                        <div class="breakdown-weight">가중치 35%</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-score" id="reviewScore">94</div>
+                        <div class="breakdown-label">리뷰 점수</div>
+                        <div class="breakdown-weight">가중치 25%</div>
+                    </div>
+                </div>
+                <div class="chart-container pie-chart">
+                    <canvas id="breakdownChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 경쟁사 비교 -->
+            <div class="analysis-card">
+                <h2 class="card-title">
+                    <span class="card-icon">⚖️</span>
+                    경쟁 제품 비교
+                </h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>제품명</th>
+                            <th>가격</th>
+                            <th>가성비점수</th>
+                            <th>순위</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="current-product">
+                            <td class="product-name-cell">Galaxy S24 Ultra</td>
+                            <td>1,398,000원</td>
+                            <td class="score-cell score-excellent">92점</td>
+                            <td><strong>1위</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="product-name-cell">iPhone 15 Pro</td>
+                            <td>1,550,000원</td>
+                            <td class="score-cell score-good">89점</td>
+                            <td>2위</td>
+                        </tr>
+                        <tr>
+                            <td class="product-name-cell">갤럭시 S23</td>
+                            <td>899,000원</td>
+                            <td class="score-cell score-good">87점</td>
+                            <td>3위</td>
+                        </tr>
+                        <tr>
+                            <td class="product-name-cell">iPhone 15</td>
+                            <td>1,250,000원</td>
+                            <td class="score-cell score-good">85점</td>
+                            <td>4위</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 점수 이력 -->
+            <div class="analysis-card">
+                <h2 class="card-title">
+                    <span class="card-icon">📈</span>
+                    점수 변화 추이
+                </h2>
+                <div class="period-selector">
+                    <button class="period-btn" onclick="changePeriod(7)">7일</button>
+                    <button class="period-btn active" onclick="changePeriod(30)">30일</button>
+                    <button class="period-btn" onclick="changePeriod(90)">90일</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="historyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 계산 근거 -->
+            <div class="analysis-card">
+                <h2 class="card-title">
+                    <span class="card-icon">🧮</span>
+                    계산 방법론
+                </h2>
+                <div class="methodology-section">
+                    <h3 class="methodology-title">점수 계산 공식</h3>
+                    <div class="methodology-item">
+                        <h4>💰 가격 점수 (40%)</h4>
+                        <p>동급 제품 대비 가격 경쟁력을 평가합니다. 같은 성능 대비 더 저렴할수록 높은 점수를 받습니다.</p>
+                    </div>
+                    <div class="methodology-item">
+                        <h4>⚡ 성능 점수 (35%)</h4>
+                        <p>벤치마크 테스트, 실사용 성능, 배터리 지속시간 등을 종합 평가합니다.</p>
+                    </div>
+                    <div class="methodology-item">
+                        <h4>⭐ 리뷰 점수 (25%)</h4>
+                        <p>실제 구매자 리뷰, 전문가 평가, 만족도 조사 결과를 종합합니다.</p>
+                    </div>
+                </div>
+
+                <div class="data-sources">
+                    <h4 class="sources-title">📊 데이터 출처</h4>
+                    <ul class="sources-list">
+                        <li>벤치마크: AnTuTu, Geekbench, 3DMark</li>
+                        <li>가격정보: 공식 매장, 주요 쇼핑몰 실시간 데이터</li>
+                        <li>리뷰데이터: 구매자 리뷰, 전문 매체 리뷰</li>
+                        <li>업데이트: 매일 오전 6시 자동 갱신</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="analysis-actions">
+            <button class="btn-recalculate" onclick="recalculateScore()">
+                🔄 최신 데이터로 재계산
+            </button>
+            <a href="08-마이페이지.html" class="btn-customize">
+                ⚙️ 가중치 개인화 설정
+            </a>
+            <a href="03-상품상세.html?id=1" class="btn-customize">
+                ← 상품으로 돌아가기
+            </a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <div class="footer-section">
+                        <h3>고객지원</h3>
+                        <ul>
+                            <li><a href="#">자주묻는질문</a></li>
+                            <li><a href="#">1:1 문의</a></li>
+                            <li><a href="#">배송조회</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h3>이용안내</h3>
+                        <ul>
+                            <li><a href="#">이용약관</a></li>
+                            <li><a href="#">개인정보처리방침</a></li>
+                            <li><a href="#">가성비 점수 안내</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 SmartPhone Store. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="common.js"></script>
+    <script>
+        let currentProduct = null;
+        let breakdownChart = null;
+        let historyChart = null;
+
+        // 페이지 로드 시 실행
+        document.addEventListener('DOMContentLoaded', async function() {
+            const params = Router.getParams();
+            const productId = params.id || '1';
+
+            await loadAnalysisData(productId);
+            initializeCharts();
+        });
+
+        // 분석 데이터 로드
+        async function loadAnalysisData(productId) {
+            try {
+                currentProduct = await API.getProduct(productId);
+                const scoreData = await API.calculateValueScore(productId);
+
+                displayAnalysisData(currentProduct, scoreData);
+            } catch (error) {
+                console.error('분석 데이터 로드 오류:', error);
+                Utils.showToast('분석 데이터를 불러올 수 없습니다.', 'error');
+            }
+        }
+
+        // 분석 데이터 표시
+        function displayAnalysisData(product, scoreData) {
+            // 제품명 업데이트
+            document.getElementById('productSubtitle').textContent =
+                `${product.name}의 상세 가성비 분석 결과를 확인하세요`;
+
+            // 메인 점수 업데이트
+            document.getElementById('mainScoreNumber').textContent = scoreData.totalScore;
+            document.getElementById('mainScoreGrade').textContent = scoreData.grade;
+            document.getElementById('mainScoreCircle').style.setProperty('--score', scoreData.totalScore);
+
+            // 세부 점수 업데이트
+            document.getElementById('priceScore').textContent = scoreData.breakdown.price;
+            document.getElementById('performanceScore').textContent = scoreData.breakdown.performance;
+            document.getElementById('reviewScore').textContent = scoreData.breakdown.review;
+
+            // 분석 날짜 업데이트
+            document.getElementById('analysisDate').textContent = new Date().toLocaleDateString('ko-KR');
+        }
+
+        // 차트 초기화
+        function initializeCharts() {
+            createBreakdownChart();
+            createHistoryChart();
+        }
+
+        // 점수 분해 차트 생성
+        function createBreakdownChart() {
+            const ctx = document.getElementById('breakdownChart').getContext('2d');
+
+            breakdownChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['가격 (40%)', '성능 (35%)', '리뷰 (25%)'],
+                    datasets: [{
+                        data: [40, 35, 25],
+                        backgroundColor: [
+                            '#3B82F6',
+                            '#10B981',
+                            '#F59E0B'
+                        ],
+                        borderWidth: 0,
+                        hoverBorderWidth: 2,
+                        hoverBorderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12,
+                                    family: 'Pretendard'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 점수 이력 차트 생성
+        function createHistoryChart() {
+            const ctx = document.getElementById('historyChart').getContext('2d');
+
+            // 30일간의 더미 데이터 생성
+            const dates = [];
+            const scores = [];
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                dates.push(date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }));
+
+                // 90-95 사이의 랜덤 점수 (약간의 변동 표현)
+                scores.push(Math.floor(Math.random() * 5) + 90);
+            }
+
+            historyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: '가성비 점수',
+                        data: scores,
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#3B82F6',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 80,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    elements: {
+                        point: {
+                            hoverRadius: 6
+                        }
+                    }
+                }
+            });
+        }
+
+        // 기간 변경
+        function changePeriod(days) {
+            // 기간 버튼 활성화 상태 변경
+            document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 차트 데이터 업데이트 (실제로는 API 호출)
+            updateHistoryChart(days);
+        }
+
+        // 이력 차트 업데이트
+        function updateHistoryChart(days) {
+            const dates = [];
+            const scores = [];
+
+            for (let i = days - 1; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+
+                if (days <= 7) {
+                    dates.push(date.toLocaleDateString('ko-KR', { weekday: 'short' }));
+                } else {
+                    dates.push(date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }));
+                }
+
+                scores.push(Math.floor(Math.random() * 5) + 90);
+            }
+
+            historyChart.data.labels = dates;
+            historyChart.data.datasets[0].data = scores;
+            historyChart.update();
+        }
+
+        // 점수 재계산
+        async function recalculateScore() {
+            if (!currentProduct) return;
+
+            const btn = event.target;
+            const originalText = btn.textContent;
+
+            try {
+                btn.disabled = true;
+                btn.textContent = '계산 중...';
+
+                // API 호출 시뮬레이션
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // 약간의 변동을 준 새로운 점수 (실제로는 API에서 받아옴)
+                const newScore = Math.floor(Math.random() * 3) + 91; // 91-93 사이
+                const newGrade = Utils.getScoreGrade(newScore);
+
+                // UI 업데이트
+                document.getElementById('mainScoreNumber').textContent = newScore;
+                document.getElementById('mainScoreGrade').textContent = newGrade;
+                document.getElementById('mainScoreCircle').style.setProperty('--score', newScore);
+
+                // 분석 날짜 업데이트
+                document.getElementById('analysisDate').textContent = new Date().toLocaleDateString('ko-KR');
+
+                Utils.showToast('최신 데이터로 점수가 업데이트되었습니다!', 'success');
+
+            } catch (error) {
+                console.error('점수 재계산 오류:', error);
+                Utils.showToast('점수 재계산 중 오류가 발생했습니다.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+    </script>
+</body>
+</html>

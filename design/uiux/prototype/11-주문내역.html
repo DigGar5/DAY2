@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주문내역 - PhoneMart</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        .orders-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+
+        /* 주문 완료 알림 */
+        .order-success {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(39, 174, 96, 0.3);
+            display: none;
+        }
+
+        .order-success.show {
+            display: block;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .success-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .success-message {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .success-order-number {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px 20px;
+            display: inline-block;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* 필터 및 검색 */
+        .orders-controls {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .order-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #ecf0f1;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #34495e;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            border-color: #3498db;
+            background: #e8f4f8;
+            color: #2980b9;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .search-input {
+            padding: 10px 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            min-width: 200px;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .btn-search {
+            padding: 10px 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-search:hover {
+            background: #2980b9;
+        }
+
+        /* 주문 목록 */
+        .orders-list {
+            space-y: 20px;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .order-card.highlight {
+            border: 2px solid #27ae60;
+            background: linear-gradient(135deg, #e8f5e8, #f8fff8);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .order-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .order-number {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .order-date {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .order-amount {
+            color: #e74c3c;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .order-status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .status-preparing {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-shipping {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-completed {
+            background: #d5edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .order-products {
+            margin-bottom: 20px;
+        }
+
+        .product-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .product-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+
+        .product-specs {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .product-price {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .product-quantity {
+            color: #34495e;
+            font-size: 0.9rem;
+        }
+
+        .delivery-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .delivery-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .delivery-status {
+            color: #34495e;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .tracking-number {
+            color: #3498db;
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 10px 20px;
+            border: 2px solid #ecf0f1;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .btn-action:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-action.primary {
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        .btn-action.primary:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-action.success {
+            border-color: #27ae60;
+            color: #27ae60;
+        }
+
+        .btn-action.success:hover {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-action.warning {
+            border-color: #f39c12;
+            color: #f39c12;
+        }
+
+        .btn-action.warning:hover {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-action.danger {
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        .btn-action.danger:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* 빈 목록 상태 */
+        .empty-orders {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: #bdc3c7;
+            margin-bottom: 20px;
+        }
+
+        .empty-message {
+            font-size: 1.3rem;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+
+        .empty-description {
+            color: #95a5a6;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .btn-continue-shopping {
+            background: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-continue-shopping:hover {
+            background: #2980b9;
+        }
+
+        /* 배송 추적 모달 */
+        .tracking-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tracking-modal.active {
+            display: flex;
+        }
+
+        .tracking-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .tracking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .tracking-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .tracking-timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .tracking-timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ecf0f1;
+        }
+
+        .tracking-step {
+            position: relative;
+            margin-bottom: 25px;
+            padding-left: 25px;
+        }
+
+        .tracking-step::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 3px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ecf0f1;
+        }
+
+        .tracking-step.completed::before {
+            background: #27ae60;
+        }
+
+        .tracking-step.current::before {
+            background: #3498db;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(52, 152, 219, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+            }
+        }
+
+        .step-time {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+
+        .step-status {
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 5px 0;
+        }
+
+        .step-location {
+            color: #34495e;
+            font-size: 0.9rem;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .orders-container {
+                padding: 15px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .controls-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .order-filters {
+                justify-content: center;
+            }
+
+            .search-input {
+                min-width: auto;
+                flex: 1;
+            }
+
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .order-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .btn-action {
+                flex: 1;
+                text-align: center;
+            }
+
+            .product-item {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .product-image {
+                width: 100px;
+                height: 100px;
+            }
+
+            .tracking-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="01-메인대시보드.html">📱 PhoneMart</a>
+            </div>
+            <nav class="nav">
+                <a href="02-검색결과.html">검색</a>
+                <a href="05-개인화추천.html">추천</a>
+                <a href="09-장바구니.html">장바구니</a>
+                <a href="08-마이페이지.html">마이페이지</a>
+            </nav>
+            <div class="header-actions">
+                <div class="user-menu">
+                    <span>홍길동님</span>
+                    <a href="#" class="btn-logout">로그아웃</a>
+                </div>
+                <div class="cart-icon">
+                    <span class="cart-count">0</span>
+                    🛒
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="orders-container">
+        <div class="page-header">
+            <h1 class="page-title">주문내역</h1>
+            <p class="page-subtitle">주문 이력을 확인하고 배송 상태를 추적하세요</p>
+        </div>
+
+        <!-- 주문 완료 알림 (새 주문시에만 표시) -->
+        <div class="order-success" id="orderSuccess">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">주문이 완료되었습니다!</div>
+            <div class="success-message">
+                결제가 정상적으로 처리되었으며,<br>
+                곧 상품 준비를 시작합니다.
+            </div>
+            <div class="success-order-number" id="newOrderNumber">
+                주문번호: 20241224-001
+            </div>
+        </div>
+
+        <div class="orders-controls">
+            <div class="controls-row">
+                <div class="order-filters">
+                    <button class="filter-btn active" data-status="all">전체</button>
+                    <button class="filter-btn" data-status="preparing">주문완료</button>
+                    <button class="filter-btn" data-status="shipping">배송중</button>
+                    <button class="filter-btn" data-status="completed">배송완료</button>
+                    <button class="filter-btn" data-status="cancelled">취소/반품</button>
+                </div>
+
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="주문번호 또는 상품명 검색">
+                    <button class="btn-search">🔍</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="orders-list" id="ordersList">
+            <!-- 주문 목록이 동적으로 표시됩니다 -->
+        </div>
+
+        <!-- 빈 목록 상태 -->
+        <div class="empty-orders" id="emptyOrders" style="display: none;">
+            <div class="empty-icon">📦</div>
+            <div class="empty-message">주문 내역이 없습니다</div>
+            <div class="empty-description">
+                아직 주문하신 상품이 없습니다.<br>
+                다양한 가성비 좋은 핸드폰을 둘러보세요!
+            </div>
+            <button class="btn-continue-shopping" onclick="window.location.href='02-검색결과.html'">
+                쇼핑하러 가기
+            </button>
+        </div>
+    </main>
+
+    <!-- 배송 추적 모달 -->
+    <div class="tracking-modal" id="trackingModal">
+        <div class="tracking-content">
+            <div class="tracking-header">
+                <h3 class="tracking-title">배송 추적</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+
+            <div class="tracking-info" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="font-weight: 600;">운송장 번호</span>
+                    <span class="tracking-number" id="trackingNumber">1234567890123</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-weight: 600;">택배사</span>
+                    <span>CJ대한통운</span>
+                </div>
+            </div>
+
+            <div class="tracking-timeline" id="trackingTimeline">
+                <!-- 배송 추적 정보가 동적으로 표시됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>PhoneMart</h3>
+                    <p>가성비 좋은 핸드폰을 찾는 가장 똑똑한 방법</p>
+                </div>
+                <div class="footer-section">
+                    <h4>고객센터</h4>
+                    <p>1588-1234</p>
+                    <p>평일 09:00-18:00</p>
+                </div>
+                <div class="footer-section">
+                    <h4>정보</h4>
+                    <a href="#">이용약관</a>
+                    <a href="#">개인정보처리방침</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="common.js"></script>
+    <script>
+        // 주문 데이터
+        let orders = [
+            {
+                id: 1,
+                orderNumber: '20241201-001',
+                date: '2024.12.01',
+                status: 'completed',
+                totalAmount: 1350000,
+                products: [
+                    {
+                        id: 1,
+                        name: 'iPhone 15 Pro 128GB',
+                        price: 1350000,
+                        quantity: 1,
+                        image: 'https://via.placeholder.com/80x80/4a90e2/white?text=iPhone',
+                        specs: '블루 티타늄, 128GB, 자급제'
+                    }
+                ],
+                deliveryInfo: {
+                    status: '배송완료',
+                    trackingNumber: '1234567890123',
+                    carrier: 'CJ대한통운',
+                    estimatedDate: '2024.12.03',
+                    completedDate: '2024.12.03'
+                }
+            },
+            {
+                id: 2,
+                orderNumber: '20241215-002',
+                date: '2024.12.15',
+                status: 'shipping',
+                totalAmount: 1590000,
+                products: [
+                    {
+                        id: 2,
+                        name: '갤럭시 S24 Ultra 256GB',
+                        price: 1590000,
+                        quantity: 1,
+                        image: 'https://via.placeholder.com/80x80/1abc9c/white?text=Galaxy',
+                        specs: '티타늄 그레이, 256GB, 자급제'
+                    }
+                ],
+                deliveryInfo: {
+                    status: '배송중',
+                    trackingNumber: '9876543210987',
+                    carrier: '한진택배',
+                    estimatedDate: '2024.12.17',
+                    currentLocation: '서울 강남구 배송센터'
+                }
+            },
+            {
+                id: 3,
+                orderNumber: '20241220-003',
+                date: '2024.12.20',
+                status: 'preparing',
+                totalAmount: 549000,
+                products: [
+                    {
+                        id: 3,
+                        name: '갤럭시 A55 128GB',
+                        price: 549000,
+                        quantity: 1,
+                        image: 'https://via.placeholder.com/80x80/f39c12/white?text=Galaxy',
+                        specs: '어썸 블루, 128GB, 자급제'
+                    }
+                ],
+                deliveryInfo: {
+                    status: '상품준비중',
+                    estimatedDate: '2024.12.22'
+                }
+            }
+        ];
+
+        // DOM 요소들
+        const ordersList = document.getElementById('ordersList');
+        const emptyOrders = document.getElementById('emptyOrders');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const searchInput = document.querySelector('.search-input');
+        const searchBtn = document.querySelector('.btn-search');
+        const trackingModal = document.getElementById('trackingModal');
+        const orderSuccess = document.getElementById('orderSuccess');
+
+        let filteredOrders = [...orders];
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            checkNewOrder();
+            renderOrders();
+            setupEventListeners();
+        });
+
+        // 새 주문 확인 및 표시
+        function checkNewOrder() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isNewOrder = urlParams.get('new') === 'true';
+
+            if (isNewOrder) {
+                const completedOrder = sessionStorage.getItem('completedOrder');
+                if (completedOrder) {
+                    const orderInfo = JSON.parse(completedOrder);
+
+                    // 새 주문을 기존 주문 목록에 추가
+                    const newOrder = {
+                        id: orders.length + 1,
+                        orderNumber: orderInfo.orderNumber,
+                        date: new Date().toLocaleDateString('ko-KR').replace(/\. /g, '.').slice(0, -1),
+                        status: 'preparing',
+                        totalAmount: orderInfo.total,
+                        products: orderInfo.items.map(item => ({
+                            ...item,
+                            specs: '자급제' // 간단히 처리
+                        })),
+                        deliveryInfo: {
+                            status: '상품준비중',
+                            estimatedDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('ko-KR').replace(/\. /g, '.').slice(0, -1)
+                        }
+                    };
+
+                    orders.unshift(newOrder); // 맨 앞에 추가
+                    filteredOrders = [...orders];
+
+                    // 성공 알림 표시
+                    document.getElementById('newOrderNumber').textContent = `주문번호: ${orderInfo.orderNumber}`;
+                    orderSuccess.classList.add('show');
+
+                    // 주문 카드 하이라이트
+                    setTimeout(() => {
+                        const firstOrderCard = document.querySelector('.order-card');
+                        if (firstOrderCard) {
+                            firstOrderCard.classList.add('highlight');
+                        }
+                    }, 1000);
+
+                    // 세션 스토리지 정리
+                    sessionStorage.removeItem('completedOrder');
+                    sessionStorage.removeItem('orderData');
+
+                    // URL 정리
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
+        }
+
+        // 이벤트 리스너 설정
+        function setupEventListeners() {
+            // 필터 버튼
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const status = this.dataset.status;
+                    filterOrders(status);
+                });
+            });
+
+            // 검색
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            // 모달 닫기
+            document.querySelector('.close-btn').addEventListener('click', function() {
+                trackingModal.classList.remove('active');
+            });
+
+            trackingModal.addEventListener('click', function(e) {
+                if (e.target === trackingModal) {
+                    trackingModal.classList.remove('active');
+                }
+            });
+
+            // 성공 알림 자동 숨김
+            if (orderSuccess.classList.contains('show')) {
+                setTimeout(() => {
+                    orderSuccess.classList.remove('show');
+                }, 8000);
+            }
+        }
+
+        // 주문 필터링
+        function filterOrders(status) {
+            if (status === 'all') {
+                filteredOrders = [...orders];
+            } else {
+                filteredOrders = orders.filter(order => order.status === status);
+            }
+            renderOrders();
+        }
+
+        // 검색 수행
+        function performSearch() {
+            const query = searchInput.value.trim().toLowerCase();
+
+            if (!query) {
+                filteredOrders = [...orders];
+            } else {
+                filteredOrders = orders.filter(order =>
+                    order.orderNumber.toLowerCase().includes(query) ||
+                    order.products.some(product =>
+                        product.name.toLowerCase().includes(query)
+                    )
+                );
+            }
+
+            renderOrders();
+        }
+
+        // 주문 목록 렌더링
+        function renderOrders() {
+            if (filteredOrders.length === 0) {
+                ordersList.style.display = 'none';
+                emptyOrders.style.display = 'block';
+                return;
+            }
+
+            ordersList.style.display = 'block';
+            emptyOrders.style.display = 'none';
+
+            ordersList.innerHTML = filteredOrders.map(order => {
+                const statusClass = getStatusClass(order.status);
+                const statusText = getStatusText(order.status);
+                const actionButtons = getActionButtons(order);
+
+                return `
+                    <div class="order-card" data-order-id="${order.id}">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <div class="order-number">주문번호: ${order.orderNumber}</div>
+                                <div class="order-date">${order.date} 주문</div>
+                                <div class="order-amount">${formatPrice(order.totalAmount)}</div>
+                            </div>
+                            <div class="order-status ${statusClass}">${statusText}</div>
+                        </div>
+
+                        <div class="order-products">
+                            ${order.products.map(product => `
+                                <div class="product-item">
+                                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                                    <div class="product-details">
+                                        <div class="product-name">${product.name}</div>
+                                        <div class="product-specs">${product.specs}</div>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                            <div class="product-price">${formatPrice(product.price)}</div>
+                                            <div class="product-quantity">수량: ${product.quantity}개</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        ${renderDeliveryInfo(order)}
+
+                        <div class="order-actions">
+                            ${actionButtons}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 배송 정보 렌더링
+        function renderDeliveryInfo(order) {
+            if (!order.deliveryInfo) return '';
+
+            const info = order.deliveryInfo;
+            let content = `
+                <div class="delivery-info">
+                    <div class="delivery-title">
+                        🚚 배송 정보
+                    </div>
+                    <div class="delivery-status">
+                        배송상태: ${info.status}
+            `;
+
+            if (info.trackingNumber) {
+                content += `<br>운송장: <span class="tracking-number">${info.trackingNumber}</span> (${info.carrier})`;
+            }
+
+            if (info.currentLocation) {
+                content += `<br>현재위치: ${info.currentLocation}`;
+            }
+
+            if (info.estimatedDate) {
+                content += `<br>도착예정: ${info.estimatedDate}`;
+            }
+
+            if (info.completedDate) {
+                content += `<br>배송완료: ${info.completedDate}`;
+            }
+
+            content += `
+                    </div>
+                </div>
+            `;
+
+            return content;
+        }
+
+        // 액션 버튼 생성
+        function getActionButtons(order) {
+            const buttons = [];
+
+            switch (order.status) {
+                case 'preparing':
+                    buttons.push(`<button class="btn-action danger" onclick="cancelOrder(${order.id})">주문 취소</button>`);
+                    buttons.push(`<button class="btn-action" onclick="showOrderDetail(${order.id})">주문 상세</button>`);
+                    break;
+
+                case 'shipping':
+                    buttons.push(`<button class="btn-action primary" onclick="showTracking('${order.deliveryInfo.trackingNumber}', '${order.orderNumber}')">배송 추적</button>`);
+                    buttons.push(`<button class="btn-action" onclick="showOrderDetail(${order.id})">주문 상세</button>`);
+                    break;
+
+                case 'completed':
+                    buttons.push(`<button class="btn-action success" onclick="writeReview(${order.id})">리뷰 작성</button>`);
+                    buttons.push(`<button class="btn-action" onclick="reorder(${order.id})">재주문</button>`);
+                    buttons.push(`<button class="btn-action primary" onclick="showTracking('${order.deliveryInfo.trackingNumber}', '${order.orderNumber}')">배송 추적</button>`);
+                    break;
+
+                case 'cancelled':
+                    buttons.push(`<button class="btn-action" onclick="showOrderDetail(${order.id})">주문 상세</button>`);
+                    buttons.push(`<button class="btn-action" onclick="reorder(${order.id})">재주문</button>`);
+                    break;
+            }
+
+            return buttons.join('');
+        }
+
+        // 상태 클래스 반환
+        function getStatusClass(status) {
+            const statusMap = {
+                'preparing': 'status-preparing',
+                'shipping': 'status-shipping',
+                'completed': 'status-completed',
+                'cancelled': 'status-cancelled'
+            };
+            return statusMap[status] || '';
+        }
+
+        // 상태 텍스트 반환
+        function getStatusText(status) {
+            const statusMap = {
+                'preparing': '주문완료',
+                'shipping': '배송중',
+                'completed': '배송완료',
+                'cancelled': '주문취소'
+            };
+            return statusMap[status] || status;
+        }
+
+        // 배송 추적 표시
+        function showTracking(trackingNumber, orderNumber) {
+            document.getElementById('trackingNumber').textContent = trackingNumber;
+
+            // 배송 추적 단계 데이터 (실제로는 API에서 받아옴)
+            const trackingSteps = [
+                {
+                    status: '주문접수',
+                    time: '2024.12.15 10:30',
+                    location: '주문 처리 완료',
+                    completed: true
+                },
+                {
+                    status: '상품준비',
+                    time: '2024.12.15 14:20',
+                    location: '물류센터 입고',
+                    completed: true
+                },
+                {
+                    status: '배송출발',
+                    time: '2024.12.16 09:15',
+                    location: '서울 물류센터 출발',
+                    completed: true
+                },
+                {
+                    status: '배송중',
+                    time: '2024.12.16 15:30',
+                    location: '강남구 배송센터 도착',
+                    completed: true,
+                    current: true
+                },
+                {
+                    status: '배송완료',
+                    time: '',
+                    location: '예정: 2024.12.17 오후',
+                    completed: false
+                }
+            ];
+
+            const timelineHtml = trackingSteps.map(step => {
+                let stepClass = '';
+                if (step.completed) stepClass += 'completed ';
+                if (step.current) stepClass += 'current ';
+
+                return `
+                    <div class="tracking-step ${stepClass}">
+                        <div class="step-time">${step.time}</div>
+                        <div class="step-status">${step.status}</div>
+                        <div class="step-location">${step.location}</div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('trackingTimeline').innerHTML = timelineHtml;
+            trackingModal.classList.add('active');
+        }
+
+        // 주문 취소
+        function cancelOrder(orderId) {
+            if (confirm('정말로 주문을 취소하시겠습니까?\n취소 후에는 되돌릴 수 없습니다.')) {
+                const order = orders.find(o => o.id === orderId);
+                if (order) {
+                    order.status = 'cancelled';
+                    order.deliveryInfo.status = '주문취소';
+                    renderOrders();
+                    showNotification('주문이 취소되었습니다.', 'warning');
+                }
+            }
+        }
+
+        // 주문 상세 보기
+        function showOrderDetail(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                showNotification(`주문 상세 정보: ${order.orderNumber}`);
+                // 실제로는 상세 페이지로 이동하거나 모달 표시
+            }
+        }
+
+        // 리뷰 작성
+        function writeReview(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                showNotification('리뷰 작성 페이지로 이동합니다.');
+                // 실제로는 리뷰 작성 페이지로 이동
+            }
+        }
+
+        // 재주문
+        function reorder(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                if (confirm('동일한 상품을 다시 주문하시겠습니까?')) {
+                    // 장바구니에 상품 추가 로직
+                    showNotification('상품을 장바구니에 담았습니다!', 'success');
+
+                    // 카트 카운트 업데이트
+                    const cartCount = document.querySelector('.cart-count');
+                    const currentCount = parseInt(cartCount.textContent);
+                    cartCount.textContent = currentCount + order.products.length;
+                }
+            }
+        }
+
+        // 가격 포맷팅
+        function formatPrice(price) {
+            return new Intl.NumberFormat('ko-KR').format(price) + '원';
+        }
+
+        // 알림 메시지 표시
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const colors = {
+                info: '#3498db',
+                success: '#27ae60',
+                warning: '#f39c12',
+                error: '#e74c3c'
+            };
+
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${colors[type] || colors.info};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+                max-width: 300px;
+            `;
+            notification.textContent = message;
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+                style.remove();
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

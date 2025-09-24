@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>장바구니 - PhoneMart</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        .cart-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+
+        .cart-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        .cart-main {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .cart-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cart-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-select-all,
+        .btn-delete-selected {
+            padding: 8px 15px;
+            border: 2px solid #ecf0f1;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-select-all:hover {
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        .btn-delete-selected:hover {
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        .cart-items {
+            space-y: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            border: 2px solid #ecf0f1;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .cart-item:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-item.selected {
+            border-color: #3498db;
+            background: #f8fbff;
+        }
+
+        .item-checkbox {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+        }
+
+        .item-checkbox input[type="checkbox"] {
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+
+        .item-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .item-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .item-specs {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .item-score {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #e8f4f8;
+            border-radius: 20px;
+            width: fit-content;
+        }
+
+        .score-value {
+            font-weight: bold;
+            color: #2980b9;
+        }
+
+        .score-grade {
+            font-size: 0.8rem;
+            color: #34495e;
+        }
+
+        .item-price-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 15px;
+            min-width: 150px;
+        }
+
+        .item-price {
+            text-align: right;
+        }
+
+        .current-price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .original-price {
+            font-size: 1rem;
+            color: #95a5a6;
+            text-decoration: line-through;
+        }
+
+        .discount-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            border: 2px solid #ecf0f1;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .qty-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .qty-btn:hover {
+            background: #e9ecef;
+        }
+
+        .qty-input {
+            width: 50px;
+            text-align: center;
+            border: none;
+            padding: 8px;
+            font-weight: 600;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .btn-remove {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-remove:hover {
+            background: #c0392b;
+        }
+
+        .btn-wishlist {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-wishlist:hover {
+            background: #7f8c8d;
+        }
+
+        .comparison-section {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid #ecf0f1;
+        }
+
+        .comparison-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .comparison-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-toggle-comparison {
+            padding: 8px 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        .btn-toggle-comparison:hover {
+            background: #2980b9;
+        }
+
+        .comparison-chart {
+            display: none;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .comparison-chart.active {
+            display: block;
+        }
+
+        .comparison-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .comparison-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .comparison-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .comparison-score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .score-bar {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .cart-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .order-summary {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 90px;
+        }
+
+        .summary-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 8px 0;
+        }
+
+        .summary-label {
+            color: #34495e;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .summary-divider {
+            border: none;
+            border-top: 1px solid #ecf0f1;
+            margin: 15px 0;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            padding: 15px 0;
+            border-top: 2px solid #3498db;
+        }
+
+        .total-price {
+            color: #e74c3c;
+        }
+
+        .btn-order {
+            width: 100%;
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-order:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-order:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 80px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .empty-message {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .empty-description {
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .btn-continue-shopping {
+            background: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-continue-shopping:hover {
+            background: #2980b9;
+        }
+
+        .shipping-info {
+            background: #e8f5e8;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .shipping-text {
+            color: #27ae60;
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .coupon-section {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .coupon-title {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .coupon-input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .coupon-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #fdbf47;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .btn-apply-coupon {
+            padding: 8px 15px;
+            background: #ffc107;
+            color: #212529;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        .btn-apply-coupon:hover {
+            background: #e0a800;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .cart-container {
+                padding: 15px;
+            }
+
+            .cart-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .cart-item {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .item-image {
+                width: 100px;
+                height: 100px;
+                align-self: center;
+            }
+
+            .item-price-section {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                min-width: auto;
+            }
+
+            .cart-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+
+            .cart-actions {
+                justify-content: center;
+            }
+
+            .comparison-items {
+                grid-template-columns: 1fr;
+            }
+
+            .order-summary {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="01-메인대시보드.html">📱 PhoneMart</a>
+            </div>
+            <nav class="nav">
+                <a href="02-검색결과.html">검색</a>
+                <a href="05-개인화추천.html">추천</a>
+                <a href="09-장바구니.html" class="active">장바구니</a>
+                <a href="08-마이페이지.html">마이페이지</a>
+            </nav>
+            <div class="header-actions">
+                <a href="07-로그인.html" class="btn-login">로그인</a>
+                <div class="cart-icon">
+                    <span class="cart-count" id="cartCount">3</span>
+                    🛒
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="cart-container">
+        <div class="page-header">
+            <h1 class="page-title">장바구니</h1>
+            <p class="page-subtitle">관심 상품을 비교하고 주문하세요</p>
+        </div>
+
+        <div class="cart-content" id="cartContent">
+            <div class="cart-main">
+                <div class="cart-header">
+                    <h2 class="cart-title">
+                        🛒 담은 상품 (<span id="itemCount">3</span>개)
+                    </h2>
+                    <div class="cart-actions">
+                        <button class="btn-select-all" id="selectAll">전체선택</button>
+                        <button class="btn-delete-selected" id="deleteSelected">선택삭제</button>
+                    </div>
+                </div>
+
+                <div class="cart-items" id="cartItems">
+                    <div class="cart-item" data-id="1">
+                        <div class="item-checkbox">
+                            <input type="checkbox" checked>
+                        </div>
+                        <img src="https://via.placeholder.com/120x120/4a90e2/white?text=iPhone+15+Pro"
+                             alt="iPhone 15 Pro" class="item-image">
+                        <div class="item-details">
+                            <div class="item-name">iPhone 15 Pro 128GB</div>
+                            <div class="item-specs">
+                                색상: 블루 티타늄<br>
+                                저장용량: 128GB<br>
+                                통신사: 자급제
+                            </div>
+                            <div class="item-score">
+                                <span class="score-value">92점</span>
+                                <span class="score-grade">우수</span>
+                            </div>
+                        </div>
+                        <div class="item-price-section">
+                            <div class="item-price">
+                                <div class="current-price">1,350,000원</div>
+                                <div class="original-price">1,450,000원</div>
+                                <div class="discount-badge">7% 할인</div>
+                            </div>
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="updateQuantity(1, -1)">-</button>
+                                <input type="number" class="qty-input" value="1" min="1" readonly>
+                                <button class="qty-btn" onclick="updateQuantity(1, 1)">+</button>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn-remove" onclick="removeItem(1)">삭제</button>
+                                <button class="btn-wishlist">찜</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cart-item" data-id="2">
+                        <div class="item-checkbox">
+                            <input type="checkbox" checked>
+                        </div>
+                        <img src="https://via.placeholder.com/120x120/1abc9c/white?text=Galaxy+S24"
+                             alt="Galaxy S24 Ultra" class="item-image">
+                        <div class="item-details">
+                            <div class="item-name">갤럭시 S24 Ultra 256GB</div>
+                            <div class="item-specs">
+                                색상: 티타늄 그레이<br>
+                                저장용량: 256GB<br>
+                                통신사: 자급제
+                            </div>
+                            <div class="item-score">
+                                <span class="score-value">89점</span>
+                                <span class="score-grade">우수</span>
+                            </div>
+                        </div>
+                        <div class="item-price-section">
+                            <div class="item-price">
+                                <div class="current-price">1,590,000원</div>
+                                <div class="original-price">1,698,400원</div>
+                                <div class="discount-badge">6% 할인</div>
+                            </div>
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="updateQuantity(2, -1)">-</button>
+                                <input type="number" class="qty-input" value="1" min="1" readonly>
+                                <button class="qty-btn" onclick="updateQuantity(2, 1)">+</button>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn-remove" onclick="removeItem(2)">삭제</button>
+                                <button class="btn-wishlist">찜</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cart-item" data-id="3">
+                        <div class="item-checkbox">
+                            <input type="checkbox">
+                        </div>
+                        <img src="https://via.placeholder.com/120x120/f39c12/white?text=Galaxy+A55"
+                             alt="Galaxy A55" class="item-image">
+                        <div class="item-details">
+                            <div class="item-name">갤럭시 A55 128GB</div>
+                            <div class="item-specs">
+                                색상: 어썸 블루<br>
+                                저장용량: 128GB<br>
+                                통신사: 자급제
+                            </div>
+                            <div class="item-score">
+                                <span class="score-value">85점</span>
+                                <span class="score-grade">양호</span>
+                            </div>
+                        </div>
+                        <div class="item-price-section">
+                            <div class="item-price">
+                                <div class="current-price">549,000원</div>
+                                <div class="original-price">599,400원</div>
+                                <div class="discount-badge">8% 할인</div>
+                            </div>
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="updateQuantity(3, -1)">-</button>
+                                <input type="number" class="qty-input" value="1" min="1" readonly>
+                                <button class="qty-btn" onclick="updateQuantity(3, 1)">+</button>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn-remove" onclick="removeItem(3)">삭제</button>
+                                <button class="btn-wishlist">찜</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-section">
+                    <div class="comparison-header">
+                        <h3 class="comparison-title">
+                            📊 가성비 비교
+                        </h3>
+                        <button class="btn-toggle-comparison" id="toggleComparison">
+                            비교 보기
+                        </button>
+                    </div>
+                    <div class="comparison-chart" id="comparisonChart">
+                        <div class="comparison-items">
+                            <div class="comparison-item">
+                                <div class="comparison-name">iPhone 15 Pro</div>
+                                <div class="comparison-score">92</div>
+                                <div class="score-bar">
+                                    <div class="score-fill" style="width: 92%"></div>
+                                </div>
+                            </div>
+                            <div class="comparison-item">
+                                <div class="comparison-name">Galaxy S24 Ultra</div>
+                                <div class="comparison-score">89</div>
+                                <div class="score-bar">
+                                    <div class="score-fill" style="width: 89%"></div>
+                                </div>
+                            </div>
+                            <div class="comparison-item">
+                                <div class="comparison-name">Galaxy A55</div>
+                                <div class="comparison-score">85</div>
+                                <div class="score-bar">
+                                    <div class="score-fill" style="width: 85%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cart-sidebar">
+                <div class="order-summary">
+                    <h3 class="summary-title">
+                        📋 주문 요약
+                    </h3>
+
+                    <div class="shipping-info">
+                        <div class="shipping-text">
+                            🚚 50,000원 이상 무료배송 (현재: 무료배송 대상)
+                        </div>
+                    </div>
+
+                    <div class="coupon-section">
+                        <div class="coupon-title">
+                            🎟️ 쿠폰 할인
+                        </div>
+                        <div class="coupon-input-group">
+                            <input type="text" class="coupon-input" placeholder="쿠폰 코드 입력">
+                            <button class="btn-apply-coupon">적용</button>
+                        </div>
+                    </div>
+
+                    <div class="summary-row">
+                        <span class="summary-label">선택 상품 (<span id="selectedCount">2</span>개)</span>
+                        <span class="summary-value" id="subtotal">2,940,000원</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span class="summary-label">할인 금액</span>
+                        <span class="summary-value" style="color: #e74c3c;">-148,400원</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span class="summary-label">배송비</span>
+                        <span class="summary-value">무료</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span class="summary-label">쿠폰 할인</span>
+                        <span class="summary-value" id="couponDiscount">-0원</span>
+                    </div>
+
+                    <hr class="summary-divider">
+
+                    <div class="summary-total">
+                        <span>총 결제 예정금액</span>
+                        <span class="total-price" id="totalPrice">2,940,000원</span>
+                    </div>
+
+                    <button class="btn-order" id="orderButton">
+                        선택 상품 주문하기 (<span id="orderCount">2</span>개)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 빈 장바구니 상태 (JavaScript로 동적 표시) -->
+        <div class="empty-cart" id="emptyCart" style="display: none;">
+            <div class="empty-icon">🛒</div>
+            <div class="empty-message">장바구니가 비어있습니다</div>
+            <div class="empty-description">
+                관심 상품을 장바구니에 담아보세요.<br>
+                가성비 점수를 비교하여 더 나은 선택을 할 수 있습니다.
+            </div>
+            <button class="btn-continue-shopping" onclick="window.location.href='02-검색결과.html'">
+                쇼핑 계속하기
+            </button>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>PhoneMart</h3>
+                    <p>가성비 좋은 핸드폰을 찾는 가장 똑똑한 방법</p>
+                </div>
+                <div class="footer-section">
+                    <h4>고객센터</h4>
+                    <p>1588-1234</p>
+                    <p>평일 09:00-18:00</p>
+                </div>
+                <div class="footer-section">
+                    <h4>정보</h4>
+                    <a href="#">이용약관</a>
+                    <a href="#">개인정보처리방침</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="common.js"></script>
+    <script>
+        // 장바구니 데이터
+        let cartItems = [
+            {
+                id: 1,
+                name: "iPhone 15 Pro 128GB",
+                price: 1350000,
+                originalPrice: 1450000,
+                image: "https://via.placeholder.com/120x120/4a90e2/white?text=iPhone+15+Pro",
+                score: 92,
+                quantity: 1,
+                selected: true,
+                specs: {
+                    color: "블루 티타늄",
+                    storage: "128GB",
+                    carrier: "자급제"
+                }
+            },
+            {
+                id: 2,
+                name: "갤럭시 S24 Ultra 256GB",
+                price: 1590000,
+                originalPrice: 1698400,
+                image: "https://via.placeholder.com/120x120/1abc9c/white?text=Galaxy+S24",
+                score: 89,
+                quantity: 1,
+                selected: true,
+                specs: {
+                    color: "티타늄 그레이",
+                    storage: "256GB",
+                    carrier: "자급제"
+                }
+            },
+            {
+                id: 3,
+                name: "갤럭시 A55 128GB",
+                price: 549000,
+                originalPrice: 599400,
+                image: "https://via.placeholder.com/120x120/f39c12/white?text=Galaxy+A55",
+                score: 85,
+                quantity: 1,
+                selected: false,
+                specs: {
+                    color: "어썸 블루",
+                    storage: "128GB",
+                    carrier: "자급제"
+                }
+            }
+        ];
+
+        // DOM 요소들
+        const selectAllBtn = document.getElementById('selectAll');
+        const deleteSelectedBtn = document.getElementById('deleteSelected');
+        const toggleComparisonBtn = document.getElementById('toggleComparison');
+        const comparisonChart = document.getElementById('comparisonChart');
+        const orderButton = document.getElementById('orderButton');
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCart();
+            setupEventListeners();
+        });
+
+        // 이벤트 리스너 설정
+        function setupEventListeners() {
+            // 전체선택 버튼
+            selectAllBtn.addEventListener('click', function() {
+                const allSelected = cartItems.every(item => item.selected);
+                cartItems.forEach(item => item.selected = !allSelected);
+                updateCart();
+            });
+
+            // 선택삭제 버튼
+            deleteSelectedBtn.addEventListener('click', function() {
+                if (confirm('선택된 상품을 삭제하시겠습니까?')) {
+                    cartItems = cartItems.filter(item => !item.selected);
+                    updateCart();
+                    showNotification('선택된 상품이 삭제되었습니다.');
+                }
+            });
+
+            // 비교 토글 버튼
+            toggleComparisonBtn.addEventListener('click', function() {
+                const isVisible = comparisonChart.classList.contains('active');
+                comparisonChart.classList.toggle('active');
+                this.textContent = isVisible ? '비교 보기' : '비교 숨기기';
+            });
+
+            // 주문 버튼
+            orderButton.addEventListener('click', function() {
+                const selectedItems = cartItems.filter(item => item.selected);
+                if (selectedItems.length === 0) {
+                    showNotification('주문할 상품을 선택해주세요.', 'warning');
+                    return;
+                }
+
+                // 주문 페이지로 이동
+                const orderData = {
+                    items: selectedItems,
+                    total: calculateTotal()
+                };
+                sessionStorage.setItem('orderData', JSON.stringify(orderData));
+                window.location.href = '10-주문결제.html';
+            });
+
+            // 체크박스 변경 이벤트
+            document.addEventListener('change', function(e) {
+                if (e.target.type === 'checkbox' && e.target.closest('.cart-item')) {
+                    const itemId = parseInt(e.target.closest('.cart-item').dataset.id);
+                    const item = cartItems.find(item => item.id === itemId);
+                    if (item) {
+                        item.selected = e.target.checked;
+                        updateCart();
+                    }
+                }
+            });
+
+            // 쿠폰 적용
+            document.querySelector('.btn-apply-coupon').addEventListener('click', function() {
+                const couponCode = document.querySelector('.coupon-input').value.trim();
+                if (couponCode) {
+                    applyCoupon(couponCode);
+                }
+            });
+        }
+
+        // 수량 변경
+        function updateQuantity(itemId, change) {
+            const item = cartItems.find(item => item.id === itemId);
+            if (item) {
+                const newQuantity = item.quantity + change;
+                if (newQuantity >= 1) {
+                    item.quantity = newQuantity;
+                    updateCart();
+                }
+            }
+        }
+
+        // 상품 삭제
+        function removeItem(itemId) {
+            if (confirm('이 상품을 장바구니에서 삭제하시겠습니까?')) {
+                cartItems = cartItems.filter(item => item.id !== itemId);
+                updateCart();
+                showNotification('상품이 삭제되었습니다.');
+            }
+        }
+
+        // 장바구니 업데이트
+        function updateCart() {
+            // 빈 장바구니 확인
+            if (cartItems.length === 0) {
+                document.getElementById('cartContent').style.display = 'none';
+                document.getElementById('emptyCart').style.display = 'block';
+                document.getElementById('cartCount').textContent = '0';
+                return;
+            }
+
+            document.getElementById('cartContent').style.display = 'grid';
+            document.getElementById('emptyCart').style.display = 'none';
+
+            // 장바구니 아이템 렌더링
+            renderCartItems();
+
+            // 요약 정보 업데이트
+            updateSummary();
+
+            // 전체선택 버튼 상태 업데이트
+            const allSelected = cartItems.length > 0 && cartItems.every(item => item.selected);
+            selectAllBtn.textContent = allSelected ? '전체해제' : '전체선택';
+
+            // 카트 카운트 업데이트
+            document.getElementById('cartCount').textContent = cartItems.length;
+            document.getElementById('itemCount').textContent = cartItems.length;
+
+            // 비교 차트 업데이트
+            updateComparisonChart();
+        }
+
+        // 장바구니 아이템 렌더링
+        function renderCartItems() {
+            const cartItemsContainer = document.getElementById('cartItems');
+
+            cartItemsContainer.innerHTML = cartItems.map(item => {
+                const discount = Math.round((1 - item.price / item.originalPrice) * 100);
+                const gradeText = getScoreGrade(item.score);
+
+                return `
+                    <div class="cart-item ${item.selected ? 'selected' : ''}" data-id="${item.id}">
+                        <div class="item-checkbox">
+                            <input type="checkbox" ${item.selected ? 'checked' : ''}>
+                        </div>
+                        <img src="${item.image}" alt="${item.name}" class="item-image">
+                        <div class="item-details">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-specs">
+                                색상: ${item.specs.color}<br>
+                                저장용량: ${item.specs.storage}<br>
+                                통신사: ${item.specs.carrier}
+                            </div>
+                            <div class="item-score">
+                                <span class="score-value">${item.score}점</span>
+                                <span class="score-grade">${gradeText}</span>
+                            </div>
+                        </div>
+                        <div class="item-price-section">
+                            <div class="item-price">
+                                <div class="current-price">${formatPrice(item.price * item.quantity)}</div>
+                                <div class="original-price">${formatPrice(item.originalPrice * item.quantity)}</div>
+                                <div class="discount-badge">${discount}% 할인</div>
+                            </div>
+                            <div class="quantity-control">
+                                <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
+                                <input type="number" class="qty-input" value="${item.quantity}" min="1" readonly>
+                                <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn-remove" onclick="removeItem(${item.id})">삭제</button>
+                                <button class="btn-wishlist">찜</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 요약 정보 업데이트
+        function updateSummary() {
+            const selectedItems = cartItems.filter(item => item.selected);
+            const selectedCount = selectedItems.length;
+            const subtotal = selectedItems.reduce((sum, item) => sum + (item.originalPrice * item.quantity), 0);
+            const discount = selectedItems.reduce((sum, item) => sum + ((item.originalPrice - item.price) * item.quantity), 0);
+            const total = subtotal - discount;
+
+            document.getElementById('selectedCount').textContent = selectedCount;
+            document.getElementById('subtotal').textContent = formatPrice(subtotal);
+            document.getElementById('totalPrice').textContent = formatPrice(total);
+            document.getElementById('orderCount').textContent = selectedCount;
+
+            // 주문 버튼 활성화/비활성화
+            orderButton.disabled = selectedCount === 0;
+        }
+
+        // 비교 차트 업데이트
+        function updateComparisonChart() {
+            const comparisonItems = document.querySelectorAll('.comparison-item');
+
+            cartItems.forEach((item, index) => {
+                if (comparisonItems[index]) {
+                    const nameEl = comparisonItems[index].querySelector('.comparison-name');
+                    const scoreEl = comparisonItems[index].querySelector('.comparison-score');
+                    const fillEl = comparisonItems[index].querySelector('.score-fill');
+
+                    nameEl.textContent = item.name.split(' ').slice(0, 2).join(' ');
+                    scoreEl.textContent = item.score;
+                    fillEl.style.width = item.score + '%';
+                }
+            });
+        }
+
+        // 쿠폰 적용
+        function applyCoupon(couponCode) {
+            const validCoupons = {
+                'WELCOME10': { discount: 0.1, name: '신규회원 10% 할인' },
+                'PHONE2024': { discount: 50000, name: '휴대폰 구매 5만원 할인' },
+                'VIP20': { discount: 0.2, name: 'VIP 회원 20% 할인' }
+            };
+
+            const coupon = validCoupons[couponCode.toUpperCase()];
+
+            if (coupon) {
+                const selectedItems = cartItems.filter(item => item.selected);
+                const subtotal = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+                let discountAmount;
+                if (coupon.discount < 1) {
+                    // 퍼센트 할인
+                    discountAmount = Math.round(subtotal * coupon.discount);
+                } else {
+                    // 고정 금액 할인
+                    discountAmount = Math.min(coupon.discount, subtotal);
+                }
+
+                document.getElementById('couponDiscount').textContent = '-' + formatPrice(discountAmount);
+                const currentTotal = parseInt(document.getElementById('totalPrice').textContent.replace(/[^0-9]/g, ''));
+                document.getElementById('totalPrice').textContent = formatPrice(currentTotal - discountAmount);
+
+                showNotification(`${coupon.name} 쿠폰이 적용되었습니다!`);
+                document.querySelector('.coupon-input').value = '';
+            } else {
+                showNotification('유효하지 않은 쿠폰 코드입니다.', 'error');
+            }
+        }
+
+        // 총 금액 계산
+        function calculateTotal() {
+            const selectedItems = cartItems.filter(item => item.selected);
+            return selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        }
+
+        // 점수 등급 계산
+        function getScoreGrade(score) {
+            if (score >= 90) return '우수';
+            if (score >= 80) return '양호';
+            if (score >= 70) return '보통';
+            return '개선필요';
+        }
+
+        // 가격 포맷팅
+        function formatPrice(price) {
+            return new Intl.NumberFormat('ko-KR').format(price) + '원';
+        }
+
+        // 알림 메시지 표시
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            const colors = {
+                success: '#27ae60',
+                warning: '#f39c12',
+                error: '#e74c3c'
+            };
+
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${colors[type] || colors.success};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notification.textContent = message;
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+                style.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>개인화 추천 - PhoneMart</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        .recommendation-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+
+        .settings-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .setting-group {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .setting-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .budget-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .budget-range {
+            display: flex;
+            justify-content: space-between;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .budget-value {
+            color: #e74c3c;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .brand-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .brand-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .brand-checkbox:hover {
+            background: #e8f4f8;
+        }
+
+        .brand-checkbox input[type="checkbox"] {
+            transform: scale(1.2);
+        }
+
+        .purpose-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .purpose-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .purpose-option:hover {
+            background: #e8f4f8;
+        }
+
+        .purpose-option input[type="radio"] {
+            transform: scale(1.2);
+        }
+
+        .high-score-filter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .high-score-filter input[type="checkbox"] {
+            transform: scale(1.3);
+        }
+
+        .high-score-filter label {
+            font-weight: 600;
+            color: #2980b9;
+        }
+
+        .recommendations-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .recommendations-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recommendation-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .recommendation-card {
+            border: 2px solid #e8f4f8;
+            border-radius: 15px;
+            padding: 20px;
+            background: white;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .recommendation-rank {
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 0 0 15px 0;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .recommendation-card.rank-1 .recommendation-rank {
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+        }
+
+        .recommendation-card.rank-2 .recommendation-rank {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        }
+
+        .recommendation-card.rank-3 .recommendation-rank {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+
+        .personalized-score {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #e8f4f8;
+            border-radius: 8px;
+        }
+
+        .personalized-score-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2980b9;
+        }
+
+        .score-label {
+            font-size: 0.9rem;
+            color: #34495e;
+        }
+
+        .recommendation-reason {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .reason-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .reason-text {
+            color: #34495e;
+            line-height: 1.4;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-detail {
+            flex: 1;
+            padding: 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .btn-detail:hover {
+            background: #2980b9;
+        }
+
+        .btn-cart {
+            flex: 1;
+            padding: 10px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .btn-cart:hover {
+            background: #229954;
+        }
+
+        .btn-reason {
+            padding: 10px 15px;
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        .btn-reason:hover {
+            background: #7f8c8d;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .empty-message {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .recommendation-container {
+                padding: 15px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .brand-options,
+            .purpose-options {
+                grid-template-columns: 1fr;
+            }
+
+            .recommendation-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .card-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="01-메인대시보드.html">📱 PhoneMart</a>
+            </div>
+            <nav class="nav">
+                <a href="02-검색결과.html">검색</a>
+                <a href="05-개인화추천.html" class="active">추천</a>
+                <a href="09-장바구니.html">장바구니</a>
+                <a href="08-마이페이지.html">마이페이지</a>
+            </nav>
+            <div class="header-actions">
+                <a href="07-로그인.html" class="btn-login">로그인</a>
+                <div class="cart-icon">
+                    <span class="cart-count">2</span>
+                    🛒
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="recommendation-container">
+        <div class="page-header">
+            <h1 class="page-title">개인화 추천</h1>
+            <p class="page-subtitle">당신의 선호도를 바탕으로 맞춤형 핸드폰을 추천해드립니다</p>
+        </div>
+
+        <div class="settings-section">
+            <h2 class="settings-title">
+                ⚙️ 추천 설정
+            </h2>
+            <div class="settings-grid">
+                <div class="setting-group">
+                    <div class="setting-label">💰 예산 범위</div>
+                    <input type="range" class="budget-slider" id="budgetSlider"
+                           min="100000" max="2000000" step="50000" value="800000">
+                    <div class="budget-range">
+                        <span>10만원</span>
+                        <span>200만원</span>
+                    </div>
+                    <div class="budget-value" id="budgetValue">80만원</div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-label">📱 선호 브랜드</div>
+                    <div class="brand-options">
+                        <label class="brand-checkbox">
+                            <input type="checkbox" name="brand" value="samsung">
+                            <span>삼성</span>
+                        </label>
+                        <label class="brand-checkbox">
+                            <input type="checkbox" name="brand" value="apple">
+                            <span>애플</span>
+                        </label>
+                        <label class="brand-checkbox">
+                            <input type="checkbox" name="brand" value="lg">
+                            <span>LG</span>
+                        </label>
+                        <label class="brand-checkbox">
+                            <input type="checkbox" name="brand" value="xiaomi">
+                            <span>샤오미</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-label">🎯 주요 용도</div>
+                    <div class="purpose-options">
+                        <label class="purpose-option">
+                            <input type="radio" name="purpose" value="gaming">
+                            <span>게임</span>
+                        </label>
+                        <label class="purpose-option">
+                            <input type="radio" name="purpose" value="photo">
+                            <span>사진</span>
+                        </label>
+                        <label class="purpose-option">
+                            <input type="radio" name="purpose" value="work">
+                            <span>업무</span>
+                        </label>
+                        <label class="purpose-option">
+                            <input type="radio" name="purpose" value="general" checked>
+                            <span>일반</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="high-score-filter">
+                <input type="checkbox" id="highScoreOnly" checked>
+                <label for="highScoreOnly">🏆 고득점 상품만 보기 (70점 이상)</label>
+            </div>
+        </div>
+
+        <div class="recommendations-section">
+            <h2 class="recommendations-title">
+                🎯 맞춤 추천 상품
+            </h2>
+
+            <div id="recommendationResults">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>개인화 추천을 계산하고 있습니다...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>PhoneMart</h3>
+                    <p>가성비 좋은 핸드폰을 찾는 가장 똑똑한 방법</p>
+                </div>
+                <div class="footer-section">
+                    <h4>고객센터</h4>
+                    <p>1588-1234</p>
+                    <p>평일 09:00-18:00</p>
+                </div>
+                <div class="footer-section">
+                    <h4>정보</h4>
+                    <a href="#">이용약관</a>
+                    <a href="#">개인정보처리방침</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 상세 이유 모달 -->
+    <div id="reasonModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="reasonModalTitle">추천 상세 이유</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="reasonModalBody">
+                <!-- 동적으로 생성될 내용 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="common.js"></script>
+    <script>
+        // 추천 상품 데이터
+        const recommendationData = {
+            gaming: [
+                {
+                    id: 1,
+                    name: "iPhone 15 Pro Max 256GB",
+                    price: "1,690,000원",
+                    originalPrice: "1,790,000원",
+                    image: "https://via.placeholder.com/300x200/4a90e2/white?text=iPhone+15+Pro+Max",
+                    personalizedScore: 92,
+                    generalScore: 88,
+                    reason: "강력한 A17 Pro 칩과 높은 주사율 디스플레이로 게임 성능이 뛰어남",
+                    detailedReason: {
+                        performance: "A17 Pro 칩셋으로 최고 수준의 게임 성능 제공",
+                        display: "120Hz ProMotion 디스플레이로 부드러운 게임 플레이",
+                        thermal: "향상된 쿨링 시스템으로 장시간 게임 플레이 가능",
+                        battery: "4441mAh 배터리로 게임 중 충분한 사용 시간 보장"
+                    },
+                    matchReason: "게임 용도와 선택한 브랜드 선호도를 반영하여 추천"
+                },
+                {
+                    id: 2,
+                    name: "갤럭시 S24 Ultra 512GB",
+                    price: "1,590,000원",
+                    originalPrice: "1,698,400원",
+                    image: "https://via.placeholder.com/300x200/1abc9c/white?text=Galaxy+S24+Ultra",
+                    personalizedScore: 89,
+                    generalScore: 85,
+                    reason: "Snapdragon 8 Gen 3와 대형 디스플레이로 몰입감 있는 게임 경험",
+                    detailedReason: {
+                        performance: "Snapdragon 8 Gen 3으로 고사양 게임 완벽 지원",
+                        display: "6.8인치 Dynamic AMOLED 2X로 넓은 화면과 생생한 색감",
+                        features: "S펜 지원으로 게임 외 추가 기능 활용 가능",
+                        cooling: "베이퍼 챔버 쿨링으로 발열 관리 우수"
+                    },
+                    matchReason: "예산 범위 내에서 최고의 게임 성능을 제공"
+                }
+            ],
+            photo: [
+                {
+                    id: 3,
+                    name: "iPhone 15 Pro 128GB",
+                    price: "1,350,000원",
+                    originalPrice: "1,450,000원",
+                    image: "https://via.placeholder.com/300x200/e74c3c/white?text=iPhone+15+Pro",
+                    personalizedScore: 94,
+                    generalScore: 87,
+                    reason: "48MP 메인 카메라와 전문적인 사진 편집 기능으로 완벽한 사진 촬영",
+                    detailedReason: {
+                        camera: "48MP 메인, 12MP 초광각, 12MP 망원 트리플 카메라",
+                        features: "액션 버튼과 ProRAW로 전문가급 사진 촬영",
+                        video: "4K ProRes 비디오 녹화 지원",
+                        editing: "강력한 이미지 처리 엔진과 편집 앱 생태계"
+                    },
+                    matchReason: "사진 촬영에 최적화된 카메라 시스템과 편집 기능"
+                }
+            ],
+            work: [
+                {
+                    id: 4,
+                    name: "갤럭시 S24+ 256GB",
+                    price: "1,180,000원",
+                    originalPrice: "1,279,400원",
+                    image: "https://via.placeholder.com/300x200/9b59b6/white?text=Galaxy+S24%2B",
+                    personalizedScore: 88,
+                    generalScore: 83,
+                    reason: "대용량 배터리와 멀티태스킹 최적화로 업무 효율성 극대화",
+                    detailedReason: {
+                        productivity: "DeX 모드로 PC 수준의 업무 환경 구축",
+                        battery: "4900mAh 대용량 배터리로 장시간 업무 가능",
+                        multitasking: "12GB RAM으로 여러 앱 동시 실행 원활",
+                        security: "Knox 보안 플랫폼으로 기업 수준 보안"
+                    },
+                    matchReason: "업무 생산성과 보안을 모두 고려한 최적의 선택"
+                }
+            ],
+            general: [
+                {
+                    id: 5,
+                    name: "갤럭시 A55 128GB",
+                    price: "549,000원",
+                    originalPrice: "599,400원",
+                    image: "https://via.placeholder.com/300x200/f39c12/white?text=Galaxy+A55",
+                    personalizedScore: 85,
+                    generalScore: 82,
+                    reason: "합리적인 가격에 균형잡힌 성능으로 일상 사용에 최적",
+                    detailedReason: {
+                        value: "가격 대비 뛰어난 성능과 기능",
+                        camera: "50MP 메인 카메라로 일상 사진 촬영 충분",
+                        battery: "5000mAh 배터리로 하루 종일 사용 가능",
+                        design: "프리미엄 디자인과 내구성"
+                    },
+                    matchReason: "예산 범위 내에서 가성비가 가장 뛰어난 모델"
+                },
+                {
+                    id: 6,
+                    name: "iPhone 14 128GB",
+                    price: "950,000원",
+                    originalPrice: "1,050,000원",
+                    image: "https://via.placeholder.com/300x200/3498db/white?text=iPhone+14",
+                    personalizedScore: 83,
+                    generalScore: 80,
+                    reason: "iOS 생태계와 안정적인 성능으로 일상 사용에 완벽",
+                    detailedReason: {
+                        ecosystem: "애플 생태계와의 완벽한 연동",
+                        performance: "A15 Bionic으로 일상 사용에 충분한 성능",
+                        update: "장기간 iOS 업데이트 지원 보장",
+                        quality: "뛰어난 빌드 품질과 브랜드 신뢰성"
+                    },
+                    matchReason: "안정성과 브랜드 선호도를 고려한 추천"
+                }
+            ]
+        };
+
+        let currentRecommendations = [];
+
+        // DOM 요소들
+        const budgetSlider = document.getElementById('budgetSlider');
+        const budgetValue = document.getElementById('budgetValue');
+        const brandCheckboxes = document.querySelectorAll('input[name="brand"]');
+        const purposeRadios = document.querySelectorAll('input[name="purpose"]');
+        const highScoreOnly = document.getElementById('highScoreOnly');
+        const recommendationResults = document.getElementById('recommendationResults');
+        const reasonModal = document.getElementById('reasonModal');
+
+        // 예산 슬라이더 이벤트
+        budgetSlider.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            budgetValue.textContent = (value / 10000) + '만원';
+            updateRecommendations();
+        });
+
+        // 브랜드 체크박스 이벤트
+        brandCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateRecommendations);
+        });
+
+        // 용도 라디오 이벤트
+        purposeRadios.forEach(radio => {
+            radio.addEventListener('change', updateRecommendations);
+        });
+
+        // 고득점 필터 이벤트
+        highScoreOnly.addEventListener('change', updateRecommendations);
+
+        // 추천 업데이트 함수
+        function updateRecommendations() {
+            showLoading();
+
+            // 실제로는 API 호출을 시뮬레이션
+            setTimeout(() => {
+                const selectedPurpose = document.querySelector('input[name="purpose"]:checked').value;
+                const budget = parseInt(budgetSlider.value);
+                const selectedBrands = Array.from(brandCheckboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.value);
+                const onlyHighScore = highScoreOnly.checked;
+
+                // 추천 상품 필터링
+                let recommendations = recommendationData[selectedPurpose] || recommendationData.general;
+
+                // 예산 필터링
+                recommendations = recommendations.filter(product => {
+                    const price = parseInt(product.price.replace(/[^0-9]/g, ''));
+                    return price <= budget;
+                });
+
+                // 고득점 필터링
+                if (onlyHighScore) {
+                    recommendations = recommendations.filter(product => product.personalizedScore >= 70);
+                }
+
+                // 브랜드 필터링 (브랜드가 선택된 경우)
+                if (selectedBrands.length > 0) {
+                    recommendations = recommendations.filter(product => {
+                        const productBrand = product.name.toLowerCase();
+                        return selectedBrands.some(brand => {
+                            if (brand === 'samsung') return productBrand.includes('갤럭시');
+                            if (brand === 'apple') return productBrand.includes('iphone');
+                            if (brand === 'lg') return productBrand.includes('lg');
+                            if (brand === 'xiaomi') return productBrand.includes('샤오미');
+                            return false;
+                        });
+                    });
+                }
+
+                currentRecommendations = recommendations;
+                displayRecommendations(recommendations);
+            }, 1500);
+        }
+
+        // 로딩 상태 표시
+        function showLoading() {
+            recommendationResults.innerHTML = `
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>개인화 추천을 계산하고 있습니다...</p>
+                </div>
+            `;
+        }
+
+        // 추천 결과 표시
+        function displayRecommendations(recommendations) {
+            if (recommendations.length === 0) {
+                recommendationResults.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <div class="empty-message">선택한 조건에 맞는 추천 상품이 없습니다</div>
+                        <p>필터 조건을 조정해보세요</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const cardsHtml = recommendations.map((product, index) => `
+                <div class="recommendation-card rank-${index + 1}">
+                    <div class="recommendation-rank">#${index + 1}</div>
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">
+                        ${product.price}
+                        ${product.originalPrice ? `<span style="text-decoration: line-through; color: #95a5a6; font-size: 0.9rem; margin-left: 10px;">${product.originalPrice}</span>` : ''}
+                    </div>
+                    <div class="personalized-score">
+                        <div class="personalized-score-value">${product.personalizedScore}점</div>
+                        <div class="score-label">
+                            개인화 점수<br>
+                            <small>(일반: ${product.generalScore}점)</small>
+                        </div>
+                    </div>
+                    <div class="recommendation-reason">
+                        <div class="reason-title">🎯 추천 이유</div>
+                        <div class="reason-text">${product.reason}</div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-detail" onclick="goToProductDetail(${product.id})">상세보기</button>
+                        <button class="btn-cart" onclick="addToCart(${product.id})">장바구니</button>
+                        <button class="btn-reason" onclick="showDetailedReason(${product.id})">자세한 이유</button>
+                    </div>
+                </div>
+            `).join('');
+
+            recommendationResults.innerHTML = `
+                <div class="recommendation-cards">
+                    ${cardsHtml}
+                </div>
+            `;
+        }
+
+        // 상품 상세 페이지 이동
+        function goToProductDetail(productId) {
+            window.location.href = `03-상품상세.html?id=${productId}`;
+        }
+
+        // 장바구니 추가
+        function addToCart(productId) {
+            const product = currentRecommendations.find(p => p.id === productId);
+            if (product) {
+                // 장바구니에 추가하는 로직
+                showNotification(`${product.name}을(를) 장바구니에 담았습니다!`);
+
+                // 카트 카운트 업데이트
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount) {
+                    const currentCount = parseInt(cartCount.textContent);
+                    cartCount.textContent = currentCount + 1;
+                }
+            }
+        }
+
+        // 상세한 추천 이유 모달
+        function showDetailedReason(productId) {
+            const product = currentRecommendations.find(p => p.id === productId);
+            if (!product) return;
+
+            const modalTitle = document.getElementById('reasonModalTitle');
+            const modalBody = document.getElementById('reasonModalBody');
+
+            modalTitle.textContent = `${product.name} 추천 이유`;
+
+            const detailedReasonHtml = Object.entries(product.detailedReason)
+                .map(([key, value]) => {
+                    const keyLabels = {
+                        performance: '🚀 성능',
+                        display: '📺 디스플레이',
+                        camera: '📸 카메라',
+                        battery: '🔋 배터리',
+                        features: '✨ 특징',
+                        thermal: '🌡️ 발열 관리',
+                        cooling: '❄️ 쿨링',
+                        productivity: '💼 생산성',
+                        multitasking: '🔄 멀티태스킹',
+                        security: '🔒 보안',
+                        value: '💰 가성비',
+                        design: '🎨 디자인',
+                        ecosystem: '🔗 생태계',
+                        update: '🔄 업데이트',
+                        quality: '⭐ 품질',
+                        video: '🎥 비디오',
+                        editing: '✏️ 편집'
+                    };
+
+                    return `
+                        <div style="margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <h4 style="color: #2c3e50; margin-bottom: 8px;">${keyLabels[key] || key}</h4>
+                            <p style="color: #34495e; margin: 0; line-height: 1.4;">${value}</p>
+                        </div>
+                    `;
+                })
+                .join('');
+
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 20px; padding: 15px; background: #e8f4f8; border-radius: 8px;">
+                    <h4 style="color: #2980b9; margin-bottom: 8px;">🎯 매칭 근거</h4>
+                    <p style="color: #34495e; margin: 0; line-height: 1.4;">${product.matchReason}</p>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">📊 상세 분석</h4>
+                    ${detailedReasonHtml}
+                </div>
+                <div style="padding: 15px; background: #e8f5e8; border-radius: 8px;">
+                    <h4 style="color: #27ae60; margin-bottom: 8px;">💡 결론</h4>
+                    <p style="color: #2e7d32; margin: 0; line-height: 1.4; font-weight: 500;">
+                        선택하신 ${document.querySelector('input[name="purpose"]:checked').nextElementSibling.textContent} 용도에
+                        개인화 점수 ${product.personalizedScore}점으로 가장 적합한 상품입니다.
+                    </p>
+                </div>
+            `;
+
+            reasonModal.style.display = 'block';
+        }
+
+        // 모달 닫기 이벤트
+        document.querySelector('.close').addEventListener('click', function() {
+            reasonModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function(event) {
+            if (event.target === reasonModal) {
+                reasonModal.style.display = 'none';
+            }
+        });
+
+        // 알림 메시지 표시
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #27ae60;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notification.textContent = message;
+
+            // 슬라이드 인 애니메이션
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+                style.remove();
+            }, 3000);
+        }
+
+        // 페이지 로드 시 초기 추천 표시
+        document.addEventListener('DOMContentLoaded', function() {
+            updateRecommendations();
+        });
+    </script>
+</body>
+</html>

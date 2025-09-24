@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy S24 Ultra - SmartPhone Store</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        .breadcrumb {
+            padding: var(--space-4) 0;
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+        }
+
+        .breadcrumb a {
+            color: var(--gray-600);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-600);
+        }
+
+        .product-detail-container {
+            background: white;
+            border-radius: 12px;
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-8);
+            margin-bottom: var(--space-8);
+        }
+
+        /* 이미지 갤러리 */
+        .product-gallery {
+            position: relative;
+        }
+
+        .main-image-container {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: var(--space-4);
+            background: var(--gray-100);
+            aspect-ratio: 1;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: zoom-in;
+            transition: transform var(--duration-normal) var(--ease-out);
+        }
+
+        .main-image:hover {
+            transform: scale(1.05);
+        }
+
+        .image-badges {
+            position: absolute;
+            top: var(--space-4);
+            left: var(--space-4);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .thumbnail-container {
+            display: flex;
+            gap: var(--space-2);
+            overflow-x: auto;
+            padding: var(--space-1) 0;
+        }
+
+        .thumbnail {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color var(--duration-normal) var(--ease-out);
+        }
+
+        .thumbnail.active {
+            border-color: var(--primary-600);
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 상품 정보 패널 */
+        .product-info-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-header {
+            margin-bottom: var(--space-6);
+        }
+
+        .product-brand {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+            margin-bottom: var(--space-2);
+        }
+
+        .product-title {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            color: var(--gray-900);
+            margin-bottom: var(--space-4);
+            line-height: var(--leading-tight);
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-bottom: var(--space-4);
+        }
+
+        .stars {
+            display: flex;
+            gap: var(--space-1);
+        }
+
+        .star {
+            color: var(--warning-500);
+            font-size: var(--text-lg);
+        }
+
+        .rating-text {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+        }
+
+        .price-section {
+            margin-bottom: var(--space-6);
+            padding: var(--space-4);
+            background: var(--gray-50);
+            border-radius: 8px;
+        }
+
+        .price-current {
+            font-family: var(--font-mono);
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            color: var(--gray-900);
+            margin-bottom: var(--space-2);
+        }
+
+        .price-original {
+            font-family: var(--font-mono);
+            font-size: var(--text-lg);
+            color: var(--gray-500);
+            text-decoration: line-through;
+            margin-right: var(--space-3);
+        }
+
+        .discount-badge {
+            background: var(--error-600);
+            color: white;
+            padding: var(--space-1) var(--space-2);
+            border-radius: 4px;
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+        }
+
+        /* 가성비 점수 섹션 */
+        .score-section {
+            background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+            border-radius: 12px;
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            text-align: center;
+        }
+
+        .score-title {
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            color: var(--gray-900);
+            margin-bottom: var(--space-4);
+        }
+
+        .score-display-large {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-4);
+        }
+
+        .score-circle-large {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: var(--gray-200);
+            margin: 0 auto;
+        }
+
+        .score-circle-large::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--primary-600) 0deg,
+                var(--primary-600) calc(var(--score, 0) * 3.6deg),
+                transparent calc(var(--score, 0) * 3.6deg)
+            );
+        }
+
+        .score-content-large {
+            position: relative;
+            z-index: 1;
+            background: white;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-number-large {
+            font-family: var(--font-mono);
+            font-size: var(--text-4xl);
+            font-weight: var(--font-bold);
+            color: var(--primary-700);
+            line-height: 1;
+        }
+
+        .score-grade-large {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+            margin-top: var(--space-1);
+        }
+
+        .score-actions {
+            display: flex;
+            gap: var(--space-3);
+            justify-content: center;
+        }
+
+        .btn-calculate {
+            background: var(--primary-600);
+            color: white;
+            border: none;
+            padding: var(--space-3) var(--space-6);
+            border-radius: 8px;
+            font-size: var(--text-base);
+            font-weight: var(--font-medium);
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-out);
+        }
+
+        .btn-calculate:hover {
+            background: var(--primary-700);
+        }
+
+        .btn-calculate:disabled {
+            background: var(--gray-400);
+            cursor: not-allowed;
+        }
+
+        .btn-detail-analysis {
+            background: white;
+            color: var(--primary-600);
+            border: 1px solid var(--primary-600);
+            padding: var(--space-3) var(--space-6);
+            border-radius: 8px;
+            font-size: var(--text-base);
+            font-weight: var(--font-medium);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all var(--duration-normal) var(--ease-out);
+        }
+
+        .btn-detail-analysis:hover {
+            background: var(--primary-50);
+        }
+
+        /* 상세 사양 */
+        .specs-section {
+            margin-bottom: var(--space-6);
+        }
+
+        .specs-title {
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            color: var(--gray-900);
+            margin-bottom: var(--space-4);
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .spec-item {
+            background: var(--gray-50);
+            padding: var(--space-4);
+            border-radius: 8px;
+        }
+
+        .spec-label {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+            margin-bottom: var(--space-1);
+        }
+
+        .spec-value {
+            font-size: var(--text-base);
+            font-weight: var(--font-medium);
+            color: var(--gray-900);
+        }
+
+        /* 액션 버튼들 */
+        .action-buttons {
+            display: flex;
+            gap: var(--space-3);
+            margin-top: auto;
+        }
+
+        .btn-cart {
+            flex: 1;
+            background: var(--primary-600);
+            color: white;
+            border: none;
+            padding: var(--space-4) var(--space-6);
+            border-radius: 8px;
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-out);
+        }
+
+        .btn-cart:hover {
+            background: var(--primary-700);
+        }
+
+        .btn-buy-now {
+            flex: 1;
+            background: var(--secondary-600);
+            color: white;
+            border: none;
+            padding: var(--space-4) var(--space-6);
+            border-radius: 8px;
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all var(--duration-normal) var(--ease-out);
+        }
+
+        .btn-buy-now:hover {
+            background: var(--secondary-700);
+        }
+
+        /* 탭 네비게이션 */
+        .product-tabs {
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: var(--space-6);
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: var(--space-6);
+        }
+
+        .tab-button {
+            padding: var(--space-4) 0;
+            border: none;
+            background: none;
+            font-size: var(--text-base);
+            font-weight: var(--font-medium);
+            color: var(--gray-600);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all var(--duration-normal) var(--ease-out);
+        }
+
+        .tab-button.active {
+            color: var(--primary-600);
+            border-bottom-color: var(--primary-600);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 리뷰 섹션 */
+        .reviews-summary {
+            background: var(--gray-50);
+            padding: var(--space-6);
+            border-radius: 8px;
+            margin-bottom: var(--space-6);
+        }
+
+        .reviews-stats {
+            display: flex;
+            align-items: center;
+            gap: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+
+        .average-rating {
+            text-align: center;
+        }
+
+        .avg-score {
+            font-size: var(--text-4xl);
+            font-weight: var(--font-bold);
+            color: var(--primary-600);
+            line-height: 1;
+        }
+
+        .avg-stars {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-1);
+            margin: var(--space-1) 0;
+        }
+
+        .review-count {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+        }
+
+        .rating-breakdown {
+            flex: 1;
+        }
+
+        .rating-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-bottom: var(--space-1);
+        }
+
+        .rating-label {
+            font-size: var(--text-sm);
+            width: 20px;
+        }
+
+        .rating-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .rating-fill {
+            height: 100%;
+            background: var(--warning-500);
+            transition: width var(--duration-normal) var(--ease-out);
+        }
+
+        .rating-count {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+            width: 30px;
+            text-align: right;
+        }
+
+        .review-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        .review-item {
+            padding: var(--space-4);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-2);
+        }
+
+        .review-author {
+            font-weight: var(--font-medium);
+            color: var(--gray-900);
+        }
+
+        .review-date {
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+        }
+
+        .review-content {
+            font-size: var(--text-base);
+            color: var(--gray-700);
+            line-height: var(--leading-relaxed);
+        }
+
+        /* 관련 상품 */
+        .related-products {
+            background: white;
+            border-radius: 12px;
+            padding: var(--space-8);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .related-title {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-semibold);
+            color: var(--gray-900);
+            margin-bottom: var(--space-6);
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-6);
+        }
+
+        /* 로딩 오버레이 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading-content {
+            background: white;
+            padding: var(--space-8);
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .loading-spinner-large {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--gray-200);
+            border-radius: 50%;
+            border-top-color: var(--primary-600);
+            animation: spin 1s linear infinite;
+            margin: 0 auto var(--space-4);
+        }
+
+        /* 반응형 */
+        @media (max-width: 1023px) {
+            .product-main {
+                grid-template-columns: 1fr;
+            }
+
+            .product-gallery {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .product-detail-container {
+                padding: var(--space-4);
+            }
+
+            .product-title {
+                font-size: var(--text-2xl);
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .specs-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .reviews-stats {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="01-메인대시보드.html" class="logo">📱 SmartPhone Store</a>
+                <nav class="nav-menu">
+                    <a href="02-검색결과.html">상품검색</a>
+                    <a href="05-개인화추천.html">맞춤추천</a>
+                    <a href="08-마이페이지.html">마이페이지</a>
+                </nav>
+                <div class="header-actions">
+                    <a href="07-로그인.html" class="btn btn-outline btn-sm">로그인</a>
+                    <a href="09-장바구니.html" class="btn btn-primary btn-sm">
+                        장바구니 <span class="cart-count" style="display: none;">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="01-메인대시보드.html">홈</a> >
+            <a href="02-검색결과.html">검색결과</a> >
+            <span id="breadcrumbProduct">Galaxy S24 Ultra</span>
+        </nav>
+
+        <div class="product-detail-container">
+            <div class="product-main">
+                <div class="product-gallery">
+                    <div class="main-image-container">
+                        <img src="/api/placeholder/500/500" alt="Galaxy S24 Ultra" class="main-image" id="mainImage">
+                        <div class="image-badges">
+                            <span class="badge badge-best">베스트</span>
+                            <span class="badge badge-value">특가</span>
+                        </div>
+                    </div>
+                    <div class="thumbnail-container" id="thumbnailContainer">
+                        <div class="thumbnail active">
+                            <img src="/api/placeholder/80/80" alt="썸네일 1">
+                        </div>
+                        <div class="thumbnail">
+                            <img src="/api/placeholder/80/80" alt="썸네일 2">
+                        </div>
+                        <div class="thumbnail">
+                            <img src="/api/placeholder/80/80" alt="썸네일 3">
+                        </div>
+                        <div class="thumbnail">
+                            <img src="/api/placeholder/80/80" alt="썸네일 4">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-info-panel">
+                    <div class="product-header">
+                        <div class="product-brand" id="productBrand">삼성</div>
+                        <h1 class="product-title" id="productTitle">Galaxy S24 Ultra</h1>
+                        <div class="product-rating">
+                            <div class="stars" id="productStars">
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                            </div>
+                            <span class="rating-text" id="ratingText">4.8 (128개 리뷰)</span>
+                        </div>
+                    </div>
+
+                    <div class="price-section">
+                        <div class="price-current" id="currentPrice">1,398,000원</div>
+                        <div>
+                            <span class="price-original" id="originalPrice">1,600,000원</span>
+                            <span class="discount-badge" id="discountBadge">13% 할인</span>
+                        </div>
+                    </div>
+
+                    <div class="score-section">
+                        <h3 class="score-title">📊 AI 가성비 점수</h3>
+                        <div class="score-display-large">
+                            <div class="score-circle-large" style="--score: 92" id="scoreCircle">
+                                <div class="score-content-large">
+                                    <span class="score-number-large" id="scoreNumber">92</span>
+                                    <span class="score-grade-large" id="scoreGrade">우수</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="score-actions">
+                            <button class="btn-calculate" id="calculateBtn" onclick="calculateScore()">
+                                🔄 점수 재계산
+                            </button>
+                            <a href="04-가성비분석.html?id=1" class="btn-detail-analysis">
+                                📈 상세 분석 보기
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="specs-section">
+                        <h3 class="specs-title">주요 사양</h3>
+                        <div class="specs-grid" id="specsGrid">
+                            <div class="spec-item">
+                                <div class="spec-label">디스플레이</div>
+                                <div class="spec-value">6.8인치 Dynamic AMOLED</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">프로세서</div>
+                                <div class="spec-value">Snapdragon 8 Gen 3</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">메모리</div>
+                                <div class="spec-value">12GB RAM</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">저장용량</div>
+                                <div class="spec-value">256GB</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">배터리</div>
+                                <div class="spec-value">5000mAh</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">카메라</div>
+                                <div class="spec-value">200MP 메인</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-cart" onclick="addToCart()" id="cartButton">
+                            🛒 장바구니 담기
+                        </button>
+                        <a href="10-주문결제.html" class="btn-buy-now">
+                            💳 바로구매
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-detail-container">
+            <div class="product-tabs">
+                <div class="tab-nav">
+                    <button class="tab-button active" onclick="showTab('details')">상세정보</button>
+                    <button class="tab-button" onclick="showTab('reviews')">리뷰</button>
+                    <button class="tab-button" onclick="showTab('specs')">사양</button>
+                </div>
+            </div>
+
+            <div class="tab-content active" id="details-tab">
+                <div class="product-features">
+                    <h3 class="specs-title">주요 특징</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--gray-200);">
+                            ✅ S펜 지원으로 정밀한 작업 가능
+                        </li>
+                        <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--gray-200);">
+                            ✅ 120Hz 디스플레이로 부드러운 화면
+                        </li>
+                        <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--gray-200);">
+                            ✅ IP68 방수 등급으로 안심 사용
+                        </li>
+                        <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--gray-200);">
+                            ✅ 200MP 고해상도 카메라
+                        </li>
+                        <li style="padding: var(--space-2) 0;">
+                            ✅ 5000mAh 대용량 배터리
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tab-content" id="reviews-tab">
+                <div class="reviews-summary">
+                    <div class="reviews-stats">
+                        <div class="average-rating">
+                            <div class="avg-score">4.8</div>
+                            <div class="avg-stars">
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                                <span class="star">★</span>
+                            </div>
+                            <div class="review-count">128개 리뷰</div>
+                        </div>
+                        <div class="rating-breakdown">
+                            <div class="rating-row">
+                                <span class="rating-label">5★</span>
+                                <div class="rating-bar">
+                                    <div class="rating-fill" style="width: 75%"></div>
+                                </div>
+                                <span class="rating-count">96</span>
+                            </div>
+                            <div class="rating-row">
+                                <span class="rating-label">4★</span>
+                                <div class="rating-bar">
+                                    <div class="rating-fill" style="width: 20%"></div>
+                                </div>
+                                <span class="rating-count">26</span>
+                            </div>
+                            <div class="rating-row">
+                                <span class="rating-label">3★</span>
+                                <div class="rating-bar">
+                                    <div class="rating-fill" style="width: 3%"></div>
+                                </div>
+                                <span class="rating-count">4</span>
+                            </div>
+                            <div class="rating-row">
+                                <span class="rating-label">2★</span>
+                                <div class="rating-bar">
+                                    <div class="rating-fill" style="width: 1%"></div>
+                                </div>
+                                <span class="rating-count">1</span>
+                            </div>
+                            <div class="rating-row">
+                                <span class="rating-label">1★</span>
+                                <div class="rating-bar">
+                                    <div class="rating-fill" style="width: 1%"></div>
+                                </div>
+                                <span class="rating-count">1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="review-list">
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div>
+                                <div class="review-author">김**</div>
+                                <div class="stars">
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                </div>
+                            </div>
+                            <div class="review-date">2024.01.15</div>
+                        </div>
+                        <div class="review-content">
+                            정말 만족스러운 플래그십 스마트폰입니다. S펜 기능이 정말 유용하고 카메라 성능도 뛰어납니다.
+                            특히 야간 촬영 품질이 이전 모델 대비 확실히 개선된 것 같습니다.
+                        </div>
+                    </div>
+
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div>
+                                <div class="review-author">박**</div>
+                                <div class="stars">
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">☆</span>
+                                </div>
+                            </div>
+                            <div class="review-date">2024.01.12</div>
+                        </div>
+                        <div class="review-content">
+                            성능은 확실히 좋지만 크기가 좀 큰 편입니다. 한손 사용하기에는 조금 불편해요.
+                            하지만 화면이 크고 선명해서 영상 시청에는 최고입니다.
+                        </div>
+                    </div>
+
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div>
+                                <div class="review-author">이**</div>
+                                <div class="stars">
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                    <span class="star">★</span>
+                                </div>
+                            </div>
+                            <div class="review-date">2024.01.10</div>
+                        </div>
+                        <div class="review-content">
+                            배터리 수명이 정말 좋습니다. 하루 종일 사용해도 여유가 있어요.
+                            가성비도 생각보다 괜찮은 것 같고 전반적으로 만족합니다.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="specs-tab">
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <div class="spec-label">디스플레이</div>
+                        <div class="spec-value">6.8인치 Dynamic AMOLED 2X, 3120×1440, 120Hz</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">프로세서</div>
+                        <div class="spec-value">Qualcomm Snapdragon 8 Gen 3 for Galaxy</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">메모리</div>
+                        <div class="spec-value">12GB LPDDR5X RAM</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">저장용량</div>
+                        <div class="spec-value">256GB/512GB/1TB UFS 4.0</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">후면 카메라</div>
+                        <div class="spec-value">200MP 메인 + 50MP 망원 + 10MP 망원 + 12MP 초광각</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">전면 카메라</div>
+                        <div class="spec-value">12MP</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">배터리</div>
+                        <div class="spec-value">5000mAh, 45W 유선충전, 15W 무선충전</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">운영체제</div>
+                        <div class="spec-value">Android 14, One UI 6.1</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">연결성</div>
+                        <div class="spec-value">5G, Wi-Fi 7, Bluetooth 5.3, NFC, USB-C</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">보안</div>
+                        <div class="spec-value">지문인식, 얼굴인식, Samsung Knox</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">방수</div>
+                        <div class="spec-value">IP68</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">크기/무게</div>
+                        <div class="spec-value">162.3 × 79.0 × 8.6mm, 232g</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="related-products">
+            <h2 class="related-title">🔍 관련 상품</h2>
+            <div class="related-grid" id="relatedProducts">
+                <!-- 관련 상품들이 동적으로 추가됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 로딩 오버레이 -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner-large"></div>
+            <h3>AI 가성비 점수 계산 중...</h3>
+            <p>잠시만 기다려주세요. 최적의 점수를 분석하고 있습니다.</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <div class="footer-section">
+                        <h3>고객지원</h3>
+                        <ul>
+                            <li><a href="#">자주묻는질문</a></li>
+                            <li><a href="#">1:1 문의</a></li>
+                            <li><a href="#">배송조회</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h3>이용안내</h3>
+                        <ul>
+                            <li><a href="#">이용약관</a></li>
+                            <li><a href="#">개인정보처리방침</a></li>
+                            <li><a href="#">가성비 점수 안내</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 SmartPhone Store. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="common.js"></script>
+    <script>
+        let currentProduct = null;
+
+        // 페이지 로드 시 상품 정보 불러오기
+        document.addEventListener('DOMContentLoaded', async function() {
+            const params = Router.getParams();
+            const productId = params.id || '1'; // 기본값: Galaxy S24 Ultra
+
+            await loadProductData(productId);
+            loadRelatedProducts();
+        });
+
+        // 상품 데이터 로드
+        async function loadProductData(productId) {
+            try {
+                currentProduct = await API.getProduct(productId);
+                displayProductData(currentProduct);
+            } catch (error) {
+                console.error('상품 정보 로드 오류:', error);
+                Utils.showToast('상품 정보를 불러올 수 없습니다.', 'error');
+            }
+        }
+
+        // 상품 데이터 표시
+        function displayProductData(product) {
+            // 기본 정보
+            document.getElementById('breadcrumbProduct').textContent = product.name;
+            document.getElementById('productBrand').textContent = product.brand;
+            document.getElementById('productTitle').textContent = product.name;
+            document.title = `${product.name} - SmartPhone Store`;
+
+            // 가격 정보
+            document.getElementById('currentPrice').textContent = Utils.formatPrice(product.price);
+            if (product.originalPrice > product.price) {
+                document.getElementById('originalPrice').textContent = Utils.formatPrice(product.originalPrice);
+                const discount = Utils.calculateDiscount(product.originalPrice, product.price);
+                document.getElementById('discountBadge').textContent = `${discount}% 할인`;
+            } else {
+                document.getElementById('originalPrice').style.display = 'none';
+                document.getElementById('discountBadge').style.display = 'none';
+            }
+
+            // 가성비 점수
+            document.getElementById('scoreNumber').textContent = product.score;
+            document.getElementById('scoreGrade').textContent = product.grade;
+            document.getElementById('scoreCircle').style.setProperty('--score', product.score);
+
+            // 평점 정보
+            if (product.avgRating) {
+                document.getElementById('ratingText').textContent =
+                    `${product.avgRating} (${product.reviewCount}개 리뷰)`;
+                updateStarRating(product.avgRating);
+            }
+
+            // 사양 정보
+            updateSpecsGrid(product.specs);
+
+            // 재고 상태에 따른 버튼 상태
+            const cartButton = document.getElementById('cartButton');
+            if (!product.inStock) {
+                cartButton.textContent = '품절';
+                cartButton.disabled = true;
+                cartButton.style.background = 'var(--gray-400)';
+            }
+        }
+
+        // 별점 업데이트
+        function updateStarRating(rating) {
+            const stars = document.getElementById('productStars');
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+
+            stars.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('span');
+                star.className = 'star';
+                if (i < fullStars) {
+                    star.textContent = '★';
+                } else if (i === fullStars && hasHalfStar) {
+                    star.textContent = '★'; // 실제로는 반별 처리 가능
+                } else {
+                    star.textContent = '☆';
+                }
+                stars.appendChild(star);
+            }
+        }
+
+        // 사양 그리드 업데이트
+        function updateSpecsGrid(specs) {
+            const grid = document.getElementById('specsGrid');
+            const specItems = [
+                { label: '디스플레이', value: specs.display },
+                { label: '프로세서', value: specs.processor },
+                { label: '메모리', value: specs.ram },
+                { label: '저장용량', value: specs.storage },
+                { label: '배터리', value: specs.battery },
+                { label: '카메라', value: specs.camera }
+            ];
+
+            grid.innerHTML = specItems.map(item => `
+                <div class="spec-item">
+                    <div class="spec-label">${item.label}</div>
+                    <div class="spec-value">${item.value}</div>
+                </div>
+            `).join('');
+        }
+
+        // 관련 상품 로드
+        async function loadRelatedProducts() {
+            try {
+                // 현재 상품을 제외한 유사 상품들을 가져옴
+                const allProducts = SampleData.products.filter(p => p.id !== currentProduct?.id);
+                const relatedProducts = allProducts.slice(0, 3);
+
+                const container = document.getElementById('relatedProducts');
+                container.innerHTML = relatedProducts.map(product => createRelatedProductCard(product)).join('');
+            } catch (error) {
+                console.error('관련 상품 로드 오류:', error);
+            }
+        }
+
+        // 관련 상품 카드 생성
+        function createRelatedProductCard(product) {
+            const discountRate = product.originalPrice > product.price
+                ? Utils.calculateDiscount(product.originalPrice, product.price)
+                : 0;
+
+            return `
+                <div class="product-card" onclick="goToProduct(${product.id})">
+                    <img src="${product.image || '/api/placeholder/250/200'}" alt="${product.name}"
+                         class="product-image" onerror="this.src='/api/placeholder/250/200'">
+                    <div class="product-info">
+                        <div class="product-brand">${product.brand}</div>
+                        <h3 class="product-name">${product.name}</h3>
+                        <div class="product-price">${Utils.formatPrice(product.price)}</div>
+                        ${discountRate > 0 ? `<div class="discount-rate">${discountRate}%↓</div>` : ''}
+                        <div class="product-score-small">
+                            <span class="score-badge">${product.score}점 ${product.grade}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 탭 전환
+        function showTab(tabName) {
+            // 탭 버튼 활성화 상태 변경
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 탭 콘텐츠 표시
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        // 가성비 점수 계산
+        async function calculateScore() {
+            if (!currentProduct) return;
+
+            const calculateBtn = document.getElementById('calculateBtn');
+            const overlay = document.getElementById('loadingOverlay');
+
+            try {
+                // 버튼 비활성화 및 로딩 표시
+                calculateBtn.disabled = true;
+                calculateBtn.textContent = '계산 중...';
+                overlay.style.display = 'flex';
+
+                // API 호출 (2초 지연 시뮬레이션)
+                const scoreData = await API.calculateValueScore(currentProduct.id);
+
+                // 결과 업데이트
+                document.getElementById('scoreNumber').textContent = scoreData.totalScore;
+                document.getElementById('scoreGrade').textContent = scoreData.grade;
+                document.getElementById('scoreCircle').style.setProperty('--score', scoreData.totalScore);
+
+                Utils.showToast('가성비 점수가 업데이트되었습니다!', 'success');
+
+            } catch (error) {
+                console.error('점수 계산 오류:', error);
+                Utils.showToast('점수 계산 중 오류가 발생했습니다.', 'error');
+            } finally {
+                // UI 복원
+                calculateBtn.disabled = false;
+                calculateBtn.textContent = '🔄 점수 재계산';
+                overlay.style.display = 'none';
+            }
+        }
+
+        // 장바구니에 추가
+        function addToCart() {
+            if (currentProduct && currentProduct.inStock) {
+                AppState.addToCart(currentProduct);
+                Utils.showToast('장바구니에 추가되었습니다!', 'success');
+            }
+        }
+
+        // 다른 상품으로 이동
+        function goToProduct(productId) {
+            Router.navigate('03-상품상세', { id: productId });
+        }
+
+        // 썸네일 클릭 처리
+        document.getElementById('thumbnailContainer').addEventListener('click', function(e) {
+            if (e.target.tagName === 'IMG') {
+                // 모든 썸네일의 active 클래스 제거
+                document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+
+                // 클릭된 썸네일의 부모에 active 클래스 추가
+                e.target.parentElement.classList.add('active');
+
+                // 메인 이미지 변경
+                document.getElementById('mainImage').src = e.target.src.replace('80/80', '500/500');
+            }
+        });
+    </script>
+</body>
+</html>
