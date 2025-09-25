@@ -1,0 +1,171 @@
+@startuml 관리자분석
+!theme mono
+
+title 관리자 분석 외부 시퀀스
+subtitle 피드백 분석 및 알고리즘 개선 프로세스
+
+actor "관리자" as Admin
+participant "관리자 대시보드" as Dashboard
+participant "API Gateway" as Gateway
+participant "Feedback Service" as FeedbackSvc
+participant "Analytics Service" as AnalyticsSvc
+participant "Score Service" as ScoreSvc
+participant "A/B Test Service" as ABTestSvc
+database "Redis Cache" as Cache
+database "PostgreSQL\n(Feedback DB)" as FeedbackDB
+database "MongoDB\n(Analytics DB)" as AnalyticsDB
+database "Data Warehouse" as DW
+
+== 1. 피드백 데이터 조회 ==
+Admin -> Dashboard: 분석 대시보드 접속
+Dashboard -> Gateway: GET /admin/analytics/feedback
+Gateway -> FeedbackSvc: 피드백 데이터 요청
+
+alt 캐시 데이터 확인
+    FeedbackSvc -> Cache: 집계 데이터 조회
+    Cache -> FeedbackSvc: 캐시된 데이터 반환
+else 원본 데이터 조회
+    FeedbackSvc -> FeedbackDB: 피드백 원시 데이터 조회
+    FeedbackDB -> FeedbackSvc: 피드백 데이터 반환
+    FeedbackSvc -> Cache: 집계 결과 캐싱
+end
+
+FeedbackSvc -> Gateway: 피드백 데이터 응답
+Gateway -> Dashboard: 피드백 현황 반환
+Dashboard -> Admin: 피드백 통계 표시
+
+== 2. 키워드 분석 ==
+Admin -> Dashboard: 키워드 분석 요청
+Dashboard -> Gateway: POST /admin/analytics/keywords
+Gateway -> AnalyticsSvc: 키워드 분석 시작
+
+AnalyticsSvc -> FeedbackDB: 텍스트 피드백 데이터 조회
+FeedbackDB -> AnalyticsSvc: 텍스트 데이터 반환
+
+note right of AnalyticsSvc
+    - 자연어 처리 수행
+    - 감정 분석 실행
+    - 키워드 빈도 분석
+    - 트렌드 패턴 분석
+end note
+
+AnalyticsSvc -> AnalyticsDB: 분석 결과 저장
+AnalyticsSvc -> DW: 데이터 웨어하우스 업데이트
+AnalyticsSvc -> Gateway: 분석 완료 응답
+Gateway -> Dashboard: 키워드 분석 결과
+Dashboard -> Admin: 키워드 인사이트 표시
+
+== 3. 개선 우선순위 도출 ==
+Admin -> Dashboard: 개선점 우선순위 요청
+Dashboard -> Gateway: GET /admin/analytics/priorities
+Gateway -> AnalyticsSvc: 우선순위 분석 요청
+
+AnalyticsSvc -> AnalyticsDB: 분석 데이터 조회
+AnalyticsSvc -> ScoreSvc: 현재 스코어링 성능 조회
+ScoreSvc -> Cache: 성능 메트릭 조회
+Cache -> ScoreSvc: 메트릭 데이터 반환
+ScoreSvc -> AnalyticsSvc: 성능 데이터 응답
+
+note right of AnalyticsSvc
+    우선순위 산정 기준:
+    - 피드백 빈도
+    - 사용자 만족도 영향
+    - 구현 복잡도
+    - 비즈니스 임팩트
+end note
+
+AnalyticsSvc -> Gateway: 우선순위 목록 반환
+Gateway -> Dashboard: 개선 우선순위 데이터
+Dashboard -> Admin: 개선점 우선순위 표시
+
+== 4. 알고리즘 조정 ==
+Admin -> Dashboard: 알고리즘 조정 실행
+Dashboard -> Gateway: POST /admin/algorithm/adjust
+Gateway -> ScoreSvc: 알고리즘 파라미터 조정
+
+ScoreSvc -> Cache: 기존 설정 백업
+ScoreSvc -> ScoreSvc: 가중치 및 공식 조정
+
+note right of ScoreSvc
+    조정 가능 요소:
+    - 가격 가중치
+    - 성능 가중치  
+    - 리뷰 영향도
+    - 브랜드 신뢰도
+end note
+
+ScoreSvc -> Cache: 새로운 설정 적용
+ScoreSvc -> Gateway: 조정 완료 응답
+Gateway -> Dashboard: 알고리즘 업데이트 완료
+Dashboard -> Admin: 조정 결과 확인
+
+== 5. A/B 테스트 실행 ==
+Admin -> Dashboard: A/B 테스트 설정
+Dashboard -> Gateway: POST /admin/abtest/create
+Gateway -> ABTestSvc: A/B 테스트 생성
+
+ABTestSvc -> Cache: 테스트 설정 저장
+ABTestSvc -> ScoreSvc: 기존 알고리즘 버전 확인
+ScoreSvc -> ABTestSvc: 알고리즘 정보 반환
+
+note right of ABTestSvc
+    A/B 테스트 설정:
+    - 대조군: 기존 알고리즘
+    - 실험군: 개선된 알고리즘
+    - 트래픽 분할: 50:50
+    - 테스트 기간: 2주
+end note
+
+ABTestSvc -> DW: 테스트 메타데이터 기록
+ABTestSvc -> Gateway: A/B 테스트 시작 응답
+Gateway -> Dashboard: 테스트 시작 확인
+Dashboard -> Admin: A/B 테스트 실행 중
+
+== 6. 효과 모니터링 ==
+loop 실시간 모니터링
+    Admin -> Dashboard: 테스트 현황 조회
+    Dashboard -> Gateway: GET /admin/abtest/status
+    Gateway -> ABTestSvc: 테스트 현황 요청
+    
+    ABTestSvc -> AnalyticsDB: 실시간 메트릭 조회
+    AnalyticsDB -> ABTestSvc: 성과 데이터 반환
+    
+    ABTestSvc -> Gateway: 테스트 현황 응답
+    Gateway -> Dashboard: 모니터링 데이터
+    Dashboard -> Admin: 실시간 성과 표시
+end
+
+note over Admin, DW
+    모니터링 지표:
+    - 클릭률 (CTR)
+    - 구매 전환율
+    - 사용자 만족도
+    - 이탈률 변화
+    - 수익 임팩트
+end note
+
+== 7. 결과 분석 및 적용 ==
+Admin -> Dashboard: 테스트 결과 분석 요청
+Dashboard -> Gateway: POST /admin/abtest/analyze
+Gateway -> ABTestSvc: 결과 분석 실행
+
+ABTestSvc -> AnalyticsDB: 전체 테스트 데이터 수집
+AnalyticsDB -> ABTestSvc: 완성된 데이터셋 반환
+
+ABTestSvc -> AnalyticsSvc: 통계적 유의성 분석 요청
+AnalyticsSvc -> ABTestSvc: 분석 결과 반환
+
+alt 개선 효과 확인된 경우
+    ABTestSvc -> ScoreSvc: 개선된 알고리즘 전면 적용
+    ScoreSvc -> Cache: 알고리즘 설정 업데이트
+    ScoreSvc -> ABTestSvc: 적용 완료 응답
+else 효과 미미한 경우
+    ABTestSvc -> ABTestSvc: 기존 알고리즘 유지
+end
+
+ABTestSvc -> DW: 최종 결과 데이터 저장
+ABTestSvc -> Gateway: 분석 및 적용 완료
+Gateway -> Dashboard: 최종 결과 데이터
+Dashboard -> Admin: A/B 테스트 완료 및 결과 표시
+
+@enduml

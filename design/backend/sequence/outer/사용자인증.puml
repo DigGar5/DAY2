@@ -1,0 +1,180 @@
+@startuml 사용자인증
+!theme mono
+
+title 사용자 인증 외부 시퀀스 다이어그램
+
+actor "소비자" as User
+participant "프론트엔드" as Frontend
+participant "API Gateway" as Gateway
+participant "User Service" as UserService
+participant "Email Service" as EmailService
+participant "소셜 로그인 API" as SocialAPI
+database "PostgreSQL\n(User DB)" as UserDB
+database "Redis\n(Session Store)" as Redis
+participant "JWT Token Service" as JWTService
+
+== 회원가입 플로우 ==
+
+User -> Frontend: 회원가입 페이지 접근
+Frontend -> User: 회원가입 폼 표시
+
+User -> Frontend: 회원정보 입력\n(이메일, 비밀번호, 닉네임, 약관동의)
+Frontend -> Frontend: 클라이언트 입력 검증\n(이메일 형식, 비밀번호 복잡도)
+
+Frontend -> Gateway: POST /api/auth/register\n{email, password, nickname, agreements}
+Gateway -> UserService: 회원가입 요청 전달
+
+UserService -> UserDB: 이메일 중복 확인\nSELECT * FROM users WHERE email = ?
+UserDB -> UserService: 중복 확인 결과
+
+alt 이메일 중복인 경우
+    UserService -> Gateway: 409 Conflict - 이메일 중복
+    Gateway -> Frontend: 회원가입 실패 응답
+    Frontend -> User: "이미 가입된 이메일입니다" 오류 메시지
+else 신규 이메일인 경우
+    UserService -> UserDB: 사용자 정보 저장\nINSERT INTO users (email, password_hash, nickname, status)
+    UserDB -> UserService: 사용자 생성 완료 (user_id 반환)
+    
+    UserService -> EmailService: 이메일 인증 요청\n{email, verification_token}
+    EmailService -> User: 인증 이메일 발송
+    
+    UserService -> Gateway: 201 Created - 회원가입 성공\n{user_id, email, status: 'pending_verification'}
+    Gateway -> Frontend: 회원가입 성공 응답
+    Frontend -> User: "회원가입 완료, 이메일을 확인해주세요" 메시지
+end
+
+== 이메일 인증 ==
+
+User -> User: 이메일 확인 및 인증 링크 클릭
+User -> Frontend: GET /verify-email?token={verification_token}
+
+Frontend -> Gateway: GET /api/auth/verify-email?token={verification_token}
+Gateway -> UserService: 이메일 인증 요청 전달
+
+UserService -> UserDB: 인증 토큰 확인 및 계정 활성화\nUPDATE users SET status = 'active' WHERE verification_token = ?
+UserDB -> UserService: 인증 처리 완료
+
+UserService -> JWTService: JWT 토큰 생성 요청\n{user_id, email, role}
+JWTService -> UserService: JWT 토큰 발급 (access_token, refresh_token)
+
+UserService -> Redis: 세션 정보 저장\nSET session:{user_id} {session_data} EX 86400
+Redis -> UserService: 세션 저장 완료
+
+UserService -> Gateway: 200 OK - 인증 완료\n{access_token, refresh_token, user_info}
+Gateway -> Frontend: 인증 성공 응답
+Frontend -> User: 자동 로그인 완료, 메인 페이지로 이동
+
+== 일반 로그인 플로우 ==
+
+User -> Frontend: 로그인 페이지 접근
+Frontend -> User: 로그인 폼 표시 (이메일/비밀번호, 소셜로그인 옵션)
+
+User -> Frontend: 이메일/비밀번호 입력 및 로그인 버튼 클릭
+Frontend -> Gateway: POST /api/auth/login\n{email, password, remember_me}
+Gateway -> UserService: 로그인 요청 전달
+
+UserService -> UserDB: 사용자 인증 정보 확인\nSELECT id, email, password_hash, status FROM users WHERE email = ?
+UserDB -> UserService: 사용자 정보 반환
+
+alt 인증 실패 (잘못된 이메일/비밀번호)
+    UserService -> UserDB: 로그인 실패 횟수 증가\nUPDATE users SET login_attempts = login_attempts + 1
+    UserService -> Gateway: 401 Unauthorized - 로그인 실패
+    Gateway -> Frontend: 로그인 실패 응답
+    Frontend -> User: "이메일 또는 비밀번호가 올바르지 않습니다" 오류 메시지
+else 인증 성공
+    UserService -> JWTService: JWT 토큰 생성 요청\n{user_id, email, role}
+    JWTService -> UserService: JWT 토큰 발급 (access_token, refresh_token)
+    
+    UserService -> Redis: 세션 정보 저장\nSET session:{user_id} {session_data, login_time, device_info}
+    Redis -> UserService: 세션 저장 완료
+    
+    UserService -> UserDB: 로그인 성공 기록\nUPDATE users SET last_login = NOW(), login_attempts = 0
+    
+    UserService -> Gateway: 200 OK - 로그인 성공\n{access_token, refresh_token, user_info}
+    Gateway -> Frontend: 로그인 성공 응답
+    Frontend -> User: 개인화 메뉴 표시, 메인 페이지로 이동
+end
+
+== 소셜 로그인 플로우 ==
+
+User -> Frontend: 소셜 로그인 버튼 클릭 (구글/카카오/네이버)
+Frontend -> SocialAPI: OAuth 인증 요청\nGET /oauth/authorize?client_id={}&redirect_uri={}
+SocialAPI -> User: 소셜 로그인 페이지 표시
+
+User -> SocialAPI: 소셜 계정 로그인 및 권한 승인
+SocialAPI -> Frontend: 인증 코드 반환\nGET /callback?code={auth_code}
+
+Frontend -> Gateway: POST /api/auth/social-login\n{provider: 'google', auth_code}
+Gateway -> UserService: 소셜 로그인 요청 전달
+
+UserService -> SocialAPI: 액세스 토큰 교환\nPOST /oauth/token {auth_code, client_secret}
+SocialAPI -> UserService: 액세스 토큰 반환
+
+UserService -> SocialAPI: 사용자 정보 조회\nGET /api/user?access_token={}
+SocialAPI -> UserService: 사용자 정보 반환 (email, name, profile_image)
+
+UserService -> UserDB: 기존 사용자 확인\nSELECT * FROM users WHERE email = ? OR social_id = ?
+UserDB -> UserService: 사용자 확인 결과
+
+alt 신규 사용자인 경우
+    UserService -> UserDB: 소셜 계정 연동 사용자 생성\nINSERT INTO users (email, social_provider, social_id, status)
+    UserDB -> UserService: 사용자 생성 완료
+else 기존 사용자인 경우
+    UserService -> UserDB: 로그인 정보 업데이트\nUPDATE users SET last_login = NOW()
+end
+
+UserService -> JWTService: JWT 토큰 생성 요청\n{user_id, email, role}
+JWTService -> UserService: JWT 토큰 발급
+
+UserService -> Redis: 세션 정보 저장\nSET session:{user_id} {session_data, social_provider}
+Redis -> UserService: 세션 저장 완료
+
+UserService -> Gateway: 200 OK - 소셜 로그인 성공\n{access_token, refresh_token, user_info}
+Gateway -> Frontend: 로그인 성공 응답
+Frontend -> User: 자동 로그인 완료, 메인 페이지로 이동
+
+== 개인화 설정 플로우 ==
+
+User -> Frontend: 마이페이지 > 개인화 설정 메뉴 접근
+Frontend -> Gateway: GET /api/user/preferences\nAuthorization: Bearer {access_token}
+Gateway -> JWTService: 토큰 검증 요청
+JWTService -> Gateway: 토큰 유효성 확인
+
+Gateway -> UserService: 개인화 설정 조회 요청\n{user_id}
+UserService -> UserDB: 사용자 설정 조회\nSELECT price_weight, performance_weight, review_weight FROM user_preferences WHERE user_id = ?
+UserDB -> UserService: 현재 가중치 설정 반환 (기본값: 40%, 40%, 20%)
+
+UserService -> Gateway: 200 OK - 현재 설정 반환\n{price_weight: 40, performance_weight: 40, review_weight: 20}
+Gateway -> Frontend: 개인화 설정 데이터
+Frontend -> User: 가중치 슬라이더 표시 (총합 100% 제한)
+
+User -> Frontend: 가중치 조정\n(가격: 50%, 성능: 30%, 리뷰: 20%)
+Frontend -> Frontend: 실시간 점수 변화 미리보기 계산
+Frontend -> Frontend: 가중치 합계 검증 (= 100%)
+
+User -> Frontend: "설정 저장" 버튼 클릭
+Frontend -> Gateway: PUT /api/user/preferences\nAuthorization: Bearer {access_token}\n{price_weight: 50, performance_weight: 30, review_weight: 20}
+Gateway -> JWTService: 토큰 검증
+Gateway -> UserService: 개인화 설정 업데이트 요청
+
+UserService -> UserDB: 가중치 설정 저장\nUPDATE user_preferences SET price_weight = ?, performance_weight = ?, review_weight = ?, updated_at = NOW()
+UserDB -> UserService: 설정 업데이트 완료
+
+UserService -> Redis: 개인화 설정 캐시 업데이트\nSET user_pref:{user_id} {weight_settings} EX 3600
+Redis -> UserService: 캐시 업데이트 완료
+
+UserService -> Gateway: 200 OK - 설정 저장 완료\n{message: "개인화 설정이 저장되었습니다"}
+Gateway -> Frontend: 설정 저장 성공 응답
+Frontend -> User: "설정이 저장되었습니다. 이제 개인화된 가성비 점수를 확인할 수 있습니다" 성공 메시지
+
+note over User, Redis
+**보안 고려사항**
+- JWT 토큰: RS256 알고리즘 사용, 15분 만료
+- Refresh Token: 30일 만료, Redis에 저장하여 무효화 가능
+- 비밀번호: bcrypt 해싱 (cost factor 12)
+- 로그인 실패: 5회 초과시 계정 잠금 (30분)
+- 세션 관리: Redis TTL을 통한 자동 만료
+- HTTPS 강제, CORS 설정, Rate Limiting 적용
+end note
+
+@enduml

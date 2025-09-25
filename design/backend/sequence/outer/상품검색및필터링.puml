@@ -1,0 +1,149 @@
+@startuml 상품검색및필터링
+!theme mono
+
+title 온라인 핸드폰 구매 사이트 - 상품검색 및 필터링 외부 시퀀스
+
+actor User as U
+participant "Frontend" as F
+participant "API Gateway" as AG
+participant "Product Service" as PS
+participant "Redis Cache" as RC
+participant "Elasticsearch" as ES
+participant "PostgreSQL\n(Product DB)" as PG
+
+== 1. 초기 상품 검색 ==
+U -> F: 검색어 입력 ("iPhone")
+activate F
+F -> AG: GET /api/products/search?keyword=iPhone
+activate AG
+AG -> PS: searchProducts(keyword)
+activate PS
+PS -> RC: get("search:iPhone")
+activate RC
+alt 캐시 히트
+    RC --> PS: 캐시된 검색 결과
+else 캐시 미스
+    deactivate RC
+    PS -> ES: search(keyword="iPhone")
+    activate ES
+    ES --> PS: 검색된 상품 목록 (ID, 이름, 가격, 브랜드)
+    deactivate ES
+    PS -> RC: set("search:iPhone", 결과, TTL=10분)
+    activate RC
+    deactivate RC
+end
+PS --> AG: 상품 목록 응답
+deactivate PS
+AG --> F: 검색 결과 (기본 정보)
+deactivate AG
+F --> U: 상품 목록 화면 표시
+deactivate F
+
+== 2. 필터링 적용 ==
+U -> F: 필터 조건 설정\n(가격: 50-100만원, 브랜드: Apple, 성능등급: A)
+activate F
+F -> AG: GET /api/products/search?\nkeyword=iPhone&priceMin=500000&priceMax=1000000&brand=Apple&grade=A
+activate AG
+AG -> PS: searchProductsWithFilter(searchParams)
+activate PS
+PS -> PS: 필터 조건 해시값 생성
+PS -> RC: get("search:iPhone:filter:abc123")
+activate RC
+alt 필터 캐시 히트
+    RC --> PS: 캐시된 필터 결과
+else 필터 캐시 미스
+    deactivate RC
+    PS -> ES: searchWithFilter(\nkeyword="iPhone",\npriceRange=[500000,1000000],\nbrand="Apple",\ngrade="A")
+    activate ES
+    ES --> PS: 필터링된 상품 목록
+    deactivate ES
+    PS -> RC: set("search:iPhone:filter:abc123", 결과, TTL=10분)
+    activate RC
+    deactivate RC
+end
+
+== 3. 재고 확인 ==
+loop 각 상품별 재고 확인
+    PS -> PG: SELECT stock_quantity, status\nFROM products WHERE product_id = ?
+    activate PG
+    PG --> PS: 재고 수량 및 판매상태
+    deactivate PG
+end
+PS -> PS: 재고 0이거나 판매중지 상품 필터링\n(sold_out 상태로 표시)
+PS --> AG: 필터링된 상품 목록 (재고상태 포함)
+deactivate PS
+AG --> F: 최종 검색 결과
+deactivate AG
+F --> U: 필터링된 상품 목록 표시\n(재고부족 상품은 회색 표시)
+deactivate F
+
+== 4. 상품 상세 조회 ==
+U -> F: 특정 상품 클릭 (iPhone 15 Pro)
+activate F
+F -> AG: GET /api/products/{productId}/detail
+activate AG
+AG -> PS: getProductDetail(productId)
+activate PS
+PS -> RC: get("product:detail:" + productId)
+activate RC
+alt 상세 캐시 히트
+    RC --> PS: 캐시된 상품 상세정보
+else 상세 캐시 미스
+    deactivate RC
+    par 상품 기본정보 조회
+        PS -> PG: SELECT * FROM products WHERE id = ?
+        activate PG
+        PG --> PS: 상품 기본정보
+        deactivate PG
+    and 리뷰 정보 조회
+        PS -> PG: SELECT * FROM product_reviews\nWHERE product_id = ? ORDER BY created_at DESC LIMIT 10
+        activate PG
+        PG --> PS: 최근 리뷰 10개
+        deactivate PG
+    and 상세 스펙 조회
+        PS -> PG: SELECT * FROM product_specs WHERE product_id = ?
+        activate PG
+        PG --> PS: 상품 상세 스펙
+        deactivate PG
+    end
+    PS -> PS: 상품 상세정보 조합
+    PS -> RC: set("product:detail:" + productId, 상세정보, TTL=1시간)
+    activate RC
+    deactivate RC
+end
+PS --> AG: 상품 상세정보 (기본정보+리뷰+스펙)
+deactivate PS
+AG --> F: 상세정보 응답
+deactivate AG
+F --> U: 상품 상세페이지 표시\n(스펙, 리뷰, 가격비교)
+deactivate F
+
+note right of RC
+  **캐싱 정책**
+  - 검색 결과: 10분 TTL
+  - 상품 상세: 1시간 TTL
+  - 재고 정보: 실시간 (캐시 안함)
+
+  **캐시 키 전략**
+  - 검색: "search:{keyword}"
+  - 필터: "search:{keyword}:filter:{hash}"
+  - 상세: "product:detail:{productId}"
+end note
+
+note right of ES
+  **Elasticsearch 최적화**
+  - 상품명, 브랜드, 카테고리 인덱싱
+  - 다중 필터 조건 지원
+  - 검색어 자동완성 지원
+  - 유사도 기반 정렬
+end note
+
+note right of PG
+  **데이터베이스 최적화**
+  - products 테이블 인덱스:
+    (brand, price, category)
+  - 재고는 실시간 정확성 보장
+  - 리뷰 테이블 created_at 인덱스
+end note
+
+@enduml

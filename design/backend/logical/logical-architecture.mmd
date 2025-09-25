@@ -1,0 +1,144 @@
+graph TB
+    %% 클라이언트 계층
+    Client[🖥️ Web/Mobile Client<br/>사용자 인터페이스]
+
+    %% API Gateway - 단일 진입점
+    Gateway[🚪 API Gateway<br/>• 라우팅 & 로드밸런싱<br/>• JWT 인증<br/>• Rate Limiting<br/>• 로깅]
+
+    Client --> Gateway
+
+    %% 핵심 마이크로서비스들
+    subgraph "핵심 비즈니스 서비스"
+        UserSvc[👤 User Service<br/>• 회원 가입/로그인<br/>• 개인화 가중치 설정<br/>• 사용자 프로필 관리]
+
+        ProductSvc[📱 Product Service<br/>• 상품 검색/필터링<br/>• 실시간 재고 관리<br/>• 상품 상세 정보]
+
+        ScoreSvc[⚡ Score Service<br/>CQRS 패턴 적용<br/>• 가성비 점수 계산<br/>• 점수 상세 분석<br/>• 이력 관리]
+
+        RecoSvc[🎯 Recommendation Service<br/>• 개인화 추천<br/>• 추천 근거 제공<br/>• 고득점 필터링]
+
+        OrderSvc[🛒 Order Service<br/>Saga 패턴 적용<br/>• 장바구니 관리<br/>• 주문/결제 처리<br/>• 주문 내역 관리]
+
+        FeedSvc[📝 Feedback Service<br/>• 만족도 수집<br/>• 개선 제안 분석<br/>• 알고리즘 개선]
+    end
+
+    %% API Gateway에서 서비스들로의 연결
+    Gateway --> UserSvc
+    Gateway --> ProductSvc
+    Gateway --> ScoreSvc
+    Gateway --> RecoSvc
+    Gateway --> OrderSvc
+    Gateway --> FeedSvc
+
+    %% CQRS 패턴 - Score Service 내부 구조
+    subgraph "Score Service CQRS 구조"
+        ScoreWrite[⚡ Score Writer<br/>• 복잡한 계산 로직<br/>• 외부 API 호출<br/>• 실시간 데이터 수집]
+
+        ScoreRead[📊 Score Reader<br/>• 최적화된 조회<br/>• 캐시 활용<br/>• 이력 데이터 관리]
+    end
+
+    ScoreSvc --> ScoreWrite
+    ScoreSvc --> ScoreRead
+
+    %% Circuit Breaker 패턴 - 외부 API 보호
+    subgraph "외부 API 통합 (Circuit Breaker)"
+        CB[🛡️ Circuit Breaker<br/>• 장애 격리<br/>• Fallback 처리<br/>• 자동 복구]
+
+        ExtPrice[💰 가격 API<br/>다중 쇼핑몰]
+        ExtReview[⭐ 리뷰 API<br/>평점 시스템]
+        ExtPerf[🏃 성능 API<br/>벤치마크 DB]
+    end
+
+    ScoreWrite --> CB
+    CB --> ExtPrice
+    CB --> ExtReview
+    CB --> ExtPerf
+
+    %% 캐시 계층 (Cache-Aside 패턴)
+    Cache[(🗄️ Redis Cache Cluster<br/>Cache-Aside 패턴<br/>• 가성비 점수 (1시간)<br/>• 상품 정보 (30분)<br/>• 사용자 설정 (24시간))]
+
+    ProductSvc -.->|상품 캐싱| Cache
+    ScoreRead -.->|점수 캐싱| Cache
+    RecoSvc -.->|추천 캐싱| Cache
+    UserSvc -.->|사용자 설정 캐싱| Cache
+
+    %% 이벤트 기반 아키텍처
+    EventBus[📡 Event Bus<br/>Apache Kafka<br/>• 재고 변경 이벤트<br/>• 주문 상태 변경<br/>• 점수 업데이트 알림]
+
+    ProductSvc -->|재고 변경| EventBus
+    ScoreWrite -->|점수 계산 완료| EventBus
+    OrderSvc -->|주문 상태 변경| EventBus
+    EventBus -->|실시간 업데이트| RecoSvc
+    EventBus -->|피드백 분석| FeedSvc
+
+    %% 비동기 처리 큐 (Async Request-Reply)
+    AsyncQueue[📮 Score Calculation Queue<br/>Async Request-Reply<br/>• 5초 이내 응답 보장<br/>• 진행 상태 알림]
+
+    Client -.->|비동기 점수 요청| AsyncQueue
+    AsyncQueue -.->|계산 요청| ScoreWrite
+    ScoreWrite -.->|계산 완료 알림| Client
+
+    %% 서비스 간 동기 호출
+    RecoSvc -->|개인화 점수 요청| ScoreRead
+    RecoSvc -->|사용자 가중치| UserSvc
+    OrderSvc -->|재고 확인| ProductSvc
+    ScoreWrite -->|상품 정보 조회| ProductSvc
+
+    %% Saga 패턴 - 주문 처리
+    subgraph "Order Saga Orchestrator"
+        SagaOrch[🎭 Saga Orchestrator<br/>• 분산 트랜잭션 관리<br/>• 보상 트랜잭션<br/>• 상태 추적]
+        PaymentSvc[💳 Payment Service<br/>• PG 연동<br/>• 결제 처리<br/>• 결제 이력]
+    end
+
+    OrderSvc --> SagaOrch
+    SagaOrch -->|재고 확인/차감| ProductSvc
+    SagaOrch -->|결제 처리| PaymentSvc
+
+    %% 데이터 저장소 (Database per Service)
+    subgraph "데이터베이스 계층"
+        UserDB[(👤 User Database<br/>PostgreSQL<br/>• 사용자 정보<br/>• 개인화 설정)]
+
+        ProductDB[(📱 Product Database<br/>PostgreSQL<br/>• 상품 카탈로그<br/>• 재고 정보<br/>• 검색 인덱스)]
+
+        ScoreWriteDB[(⚡ Score Write DB<br/>PostgreSQL<br/>• 계산 로직<br/>• 원시 데이터)]
+
+        ScoreReadDB[(📊 Score Read DB<br/>MongoDB<br/>• 최적화된 조회<br/>• 점수 이력)]
+
+        OrderDB[(🛒 Order Database<br/>PostgreSQL<br/>• 주문 정보<br/>• 결제 이력<br/>• 배송 상태)]
+
+        FeedDB[(📝 Feedback Database<br/>PostgreSQL<br/>• 사용자 피드백<br/>• 분석 결과)]
+    end
+
+    %% 서비스와 데이터베이스 연결
+    UserSvc --> UserDB
+    ProductSvc --> ProductDB
+    ScoreWrite --> ScoreWriteDB
+    ScoreRead --> ScoreReadDB
+    OrderSvc --> OrderDB
+    PaymentSvc --> OrderDB
+    FeedSvc --> FeedDB
+
+    %% 모니터링 및 관찰성
+    Monitor[📈 Monitoring & Observability<br/>• Prometheus/Grafana<br/>• ELK Stack<br/>• Jaeger 분산 추적<br/>• 성능 알림]
+
+    Gateway -.->|메트릭 수집| Monitor
+    CB -.->|Circuit Breaker 상태| Monitor
+    Cache -.->|캐시 히트율| Monitor
+    ScoreWrite -.->|계산 시간 추적| Monitor
+
+    %% 스타일 정의
+    classDef service fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    classDef database fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    classDef pattern fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px,color:#000
+    classDef external fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef client fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
+    classDef async fill:#f1f8e9,stroke:#558b2f,stroke-width:2px,color:#000
+
+    %% 스타일 적용
+    class UserSvc,ProductSvc,ScoreSvc,RecoSvc,OrderSvc,FeedSvc,PaymentSvc,ScoreWrite,ScoreRead service
+    class UserDB,ProductDB,ScoreWriteDB,ScoreReadDB,OrderDB,FeedDB database
+    class Gateway,CB,Cache,EventBus,SagaOrch pattern
+    class ExtPrice,ExtReview,ExtPerf external
+    class Client client
+    class AsyncQueue async
+    class Monitor pattern

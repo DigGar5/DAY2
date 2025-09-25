@@ -1,0 +1,176 @@
+@startuml 장바구니및주문
+!theme mono
+title 온라인 핸드폰 구매 사이트 - 장바구니 및 주문 외부 시퀀스
+
+actor "Consumer" as C
+participant "Frontend" as FE
+participant "API Gateway" as GW
+participant "Order Service" as OS
+participant "Product Service" as PS
+participant "User Service" as US
+participant "Payment Gateway" as PG
+participant "Shipping Service" as SS
+participant "Redis Cache" as RC
+database "Order DB" as ODB
+database "Product DB" as PDB
+queue "Message Queue" as MQ
+
+== 장바구니 담기 (UFR-ORDE-010) ==
+C -> FE: 상품 상세 페이지에서 "장바구니 담기" 클릭
+FE -> GW: POST /api/cart/items
+GW -> OS: 장바구니 추가 요청
+OS -> RC: 사용자 세션 확인
+RC -> OS: 세션 정보 반환
+OS -> PS: GET /products/{productId}/stock
+PS -> PDB: 재고 수량 조회
+PDB -> PS: 재고 정보 반환
+PS -> OS: 재고 확인 응답
+alt 재고 충분
+    OS -> RC: 장바구니에 상품 추가
+    RC -> OS: 추가 완료
+    OS -> GW: 성공 응답
+    GW -> FE: 장바구니 추가 성공
+    FE -> C: 토스트 메시지 표시
+else 재고 부족
+    OS -> GW: 재고 부족 오류
+    GW -> FE: 재고 부족 응답
+    FE -> C: 재고 부족 알림
+end
+
+== 장바구니 관리 (UFR-ORDE-020) ==
+C -> FE: 장바구니 페이지 접근
+FE -> GW: GET /api/cart
+GW -> OS: 장바구니 조회 요청
+OS -> RC: 장바구니 데이터 조회
+RC -> OS: 장바구니 상품 목록
+OS -> PS: 상품 정보 배치 조회
+PS -> PDB: 상품 상세 정보 조회
+PDB -> PS: 상품 정보 반환
+PS -> OS: 상품 정보 응답
+OS -> GW: 장바구니 정보 응답
+GW -> FE: 장바구니 데이터
+FE -> C: 장바구니 페이지 표시
+
+C -> FE: 수량 변경 요청
+FE -> GW: PUT /api/cart/items/{itemId}
+GW -> OS: 수량 변경 요청
+OS -> PS: 변경 수량 재고 확인
+PS -> PDB: 재고 확인
+PDB -> PS: 재고 정보
+PS -> OS: 재고 확인 응답
+alt 재고 충분
+    OS -> RC: 장바구니 수량 업데이트
+    RC -> OS: 업데이트 완료
+    OS -> GW: 성공 응답
+    GW -> FE: 수량 변경 성공
+    FE -> C: 총 금액 실시간 업데이트
+else 재고 부족
+    OS -> GW: 재고 부족 오류
+    GW -> FE: 재고 부족 응답
+    FE -> C: 재고 부족 알림
+end
+
+== 주문 결제 - Saga 패턴 (UFR-ORDE-030) ==
+C -> FE: "주문하기" 버튼 클릭
+FE -> GW: POST /api/orders
+GW -> OS: 주문 생성 요청
+
+note over OS: Saga 트랜잭션 시작
+OS -> MQ: OrderCreated 이벤트 발행
+OS -> ODB: 주문 임시 생성 (상태: PENDING)
+ODB -> OS: 주문번호 반환
+
+== Step 1: 재고 예약 ==
+OS -> PS: 재고 예약 요청
+PS -> PDB: 재고 차감 및 예약
+PDB -> PS: 재고 예약 완료
+PS -> OS: 재고 예약 성공
+OS -> MQ: StockReserved 이벤트 발행
+
+== Step 2: 사용자 검증 ==
+OS -> US: 사용자 정보 검증
+US -> US: 사용자 유효성 확인
+US -> OS: 사용자 검증 완료
+OS -> MQ: UserVerified 이벤트 발행
+
+== Step 3: 결제 처리 ==
+OS -> PG: 결제 요청
+PG -> PG: 카드/계좌 검증
+PG -> OS: 결제 승인
+OS -> MQ: PaymentApproved 이벤트 발행
+
+== Step 4: 배송 정보 등록 ==
+OS -> SS: 배송 정보 등록
+SS -> SS: 배송지 검증 및 등록
+SS -> OS: 배송 등록 완료
+OS -> MQ: ShippingRegistered 이벤트 발행
+
+== 주문 완료 ==
+OS -> ODB: 주문 상태 업데이트 (COMPLETED)
+ODB -> OS: 업데이트 완료
+OS -> MQ: OrderCompleted 이벤트 발행
+OS -> GW: 주문 완료 응답
+GW -> FE: 주문 성공
+FE -> C: 주문 완료 페이지 표시
+
+== 주문 내역 조회 (UFR-ORDE-040) ==
+C -> FE: 마이페이지 > 주문내역 클릭
+FE -> GW: GET /api/orders/user/{userId}
+GW -> OS: 주문 내역 조회
+OS -> ODB: 사용자 주문 목록 조회
+ODB -> OS: 주문 목록 반환
+OS -> GW: 주문 내역 응답
+GW -> FE: 주문 데이터
+FE -> C: 주문 목록 표시
+
+C -> FE: 특정 주문 상세 조회
+FE -> GW: GET /api/orders/{orderId}
+GW -> OS: 주문 상세 조회
+OS -> ODB: 주문 상세 정보 조회
+ODB -> OS: 주문 정보 반환
+OS -> SS: 배송 추적 정보 조회
+SS -> SS: 배송 상태 확인
+SS -> OS: 배송 추적 정보
+OS -> GW: 주문 상세 응답
+GW -> FE: 주문 상세 데이터
+FE -> C: 주문 상세 페이지 + 배송 추적
+
+== 보상 트랜잭션 (결제 실패 시) ==
+note over OS: 결제 실패 시 Saga 보상
+alt 결제 실패
+    PG -> OS: 결제 실패
+    OS -> MQ: PaymentFailed 이벤트 발행
+    
+    == 보상 1: 재고 해제 ==
+    OS -> PS: 재고 해제 요청
+    PS -> PDB: 예약 재고 복원
+    PDB -> PS: 재고 해제 완료
+    PS -> OS: 재고 해제 성공
+    OS -> MQ: StockReleased 이벤트 발행
+    
+    == 보상 2: 주문 취소 ==
+    OS -> ODB: 주문 상태 업데이트 (CANCELLED)
+    ODB -> OS: 취소 완료
+    OS -> MQ: OrderCancelled 이벤트 발행
+    
+    OS -> GW: 주문 실패 응답
+    GW -> FE: 결제 실패 알림
+    FE -> C: 결제 실패 메시지 표시
+end
+
+== 보상 트랜잭션 (재고 부족 시) ==
+alt 재고 부족
+    PS -> OS: 재고 부족
+    OS -> MQ: StockInsufficient 이벤트 발행
+    
+    == 보상: 주문 취소 ==
+    OS -> ODB: 주문 상태 업데이트 (CANCELLED)
+    ODB -> OS: 취소 완료
+    OS -> MQ: OrderCancelled 이벤트 발행
+    
+    OS -> GW: 재고 부족 오류
+    GW -> FE: 재고 부족 응답
+    FE -> C: 재고 부족 알림
+end
+
+@enduml

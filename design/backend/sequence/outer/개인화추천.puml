@@ -1,0 +1,103 @@
+@startuml 개인화추천_외부시퀀스
+!theme mono
+
+title 개인화추천 외부 시퀀스 다이어그램
+participant "Frontend" as FE
+participant "API Gateway" as GW
+participant "Recommendation Service" as RECO
+participant "User Service" as USER
+participant "Score Service" as SCORE
+participant "Product Service" as PROD
+participant "Redis Cache" as REDIS
+database "PostgreSQL\n(User DB)" as USERDB
+database "MongoDB\n(Score Read DB)" as SCOREDB
+database "PostgreSQL\n(Product DB)" as PRODDB
+
+== 개인화 추천 요청 ==
+FE -> GW : POST /recommendations/personalized\n{userId, budget, preferences}
+note right : 예산과 선호조건으로\n개인화 추천 요청
+
+GW -> RECO : POST /internal/personalized-recommendations\n{userId, budget, preferences}
+note right : 내부 추천 API 호출
+
+== 사용자 설정 조회 ==
+RECO -> REDIS : GET user_profile:{userId}
+alt 캐시 히트
+    REDIS -> RECO : 사용자 프로필 데이터
+else 캐시 미스
+    RECO -> USER : GET /users/{userId}/profile
+    USER -> USERDB : SELECT * FROM user_profiles WHERE user_id = ?
+    USERDB -> USER : 사용자 프로필
+    USER -> RECO : 사용자 프로필 데이터
+    RECO -> REDIS : SETEX user_profile:{userId} 3600 profile_data
+    note right : 1시간 캐싱
+end
+
+== 개인화 가중치 계산 ==
+RECO -> RECO : calculatePersonalizationWeights(profile, preferences)
+note right : 브랜드 선호도: 30%\n성능 중시: 25%\n가격 민감도: 20%\n디자인 중시: 15%\n기타: 10%
+
+== 후보 상품 조회 ==
+RECO -> REDIS : GET products_by_budget:{budget_range}
+alt 캐시 히트
+    REDIS -> RECO : 예산 범위 상품 목록
+else 캐시 미스
+    RECO -> PROD : GET /products/by-budget?min={minBudget}&max={maxBudget}
+    PROD -> PRODDB : SELECT * FROM products\nWHERE price BETWEEN ? AND ?\nAND status = 'active'
+    PRODDB -> PROD : 상품 목록
+    PROD -> RECO : 상품 목록
+    RECO -> REDIS : SETEX products_by_budget:{budget_range} 1800 products
+    note right : 30분 캐싱
+end
+
+== 개인화 점수 재계산 ==
+loop 각 상품별
+    RECO -> REDIS : GET score_details:{productId}
+    alt 캐시 히트
+        REDIS -> RECO : 상품 점수 세부사항
+    else 캐시 미스
+        RECO -> SCORE : GET /scores/{productId}/details
+        SCORE -> SCOREDB : db.scores.findOne({productId: productId})
+        SCOREDB -> SCORE : 점수 세부사항
+        SCORE -> RECO : 점수 세부사항
+        RECO -> REDIS : SETEX score_details:{productId} 1800 score_details
+        note right : 30분 캐싱
+    end
+    
+    RECO -> RECO : personalizedScore = calculatePersonalizedScore(\nscore_details, personalization_weights)
+    note right : 개인화 가중치 적용하여\n점수 재계산
+end
+
+== 고득점 필터링 및 정렬 ==
+RECO -> RECO : filterHighScoreProducts(personalizedScores, minScore=70)
+note right : 70점 이상만 필터링
+
+RECO -> RECO : sortByPersonalizedScore(filteredProducts)
+note right : 개인화 점수 내림차순 정렬
+
+RECO -> RECO : selectTop5Products(sortedProducts)
+note right : 상위 5개 선택
+
+== 추천 근거 생성 ==
+loop 상위 5개 상품별
+    RECO -> RECO : generateRecommendationReason(\nproduct, personalization_weights, score_details)
+    note right : 추천 이유 생성:\n- 예산 적합성\n- 개인 선호도 매칭\n- 강점 포인트
+end
+
+== 응답 반환 ==
+RECO -> GW : 200 OK\n{\n  "recommendations": [\n    {\n      "productId": "p001",\n      "personalizedScore": 85.5,\n      "reason": "예산에 적합하고 성능이 우수함",\n      "strengths": ["고성능 프로세서", "대용량 배터리"]\n    }\n  ],\n  "processingTime": "1.2s"\n}
+
+GW -> FE : 200 OK\n개인화 추천 결과 (상위 5개)
+
+== 응답 캐싱 ==
+RECO -> REDIS : SETEX personalized_reco:{userId}:{hash} 600 recommendations
+note right : 10분간 동일 조건\n요청 시 캐시 응답
+
+note over RECO
+성능 목표:
+- 응답시간: 2초 이내
+- 캐시 활용률: 80% 이상
+- 개인화 정확도: 85% 이상
+end note
+
+@enduml
